@@ -2,11 +2,24 @@
 @use "src/CustomQuotesModel/CustomQuotesModel";
 @use "src/Settings/Settings";
 
-.setting-item.search-provider .setting-item-control input {
-	width: 100%;
-	border: none;
-	background: none;
-	outline: none;
-	box-shadow: none;
-	text-align: right;
+// Search-provider settings: the selected provider sits on its own line under
+// the description (in the info block), so the long description can run almost
+// to the Change button without truncating the value.
+.setting-item.newtab-search-provider {
+	.newtab-search-provider-current {
+		margin-top: 8px;
+		font-size: var(--font-ui-small);
+
+		.newtab-search-provider-current-label {
+			opacity: 0.6;
+		}
+
+		.newtab-search-provider-current-value {
+			padding: 1px 6px;
+			border-radius: var(--radius-s);
+			background: var(--background-modifier-hover);
+			color: var(--text-normal);
+			font-weight: var(--font-semibold);
+		}
+	}
 }

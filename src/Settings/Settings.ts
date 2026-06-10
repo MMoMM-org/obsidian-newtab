@@ -78,6 +78,26 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	/**
+	 * Render the currently selected search provider as a highlighted line
+	 * beneath a setting's description. Keeping it in the info block (rather than
+	 * a disabled text input in the control area) stops a long description from
+	 * squeezing the value into a narrow, truncating column on the right.
+	 */
+	private renderSelectedProvider(setting: Setting, display: string): void {
+		const current = setting.descEl.createDiv({
+			cls: "newtab-search-provider-current",
+		});
+		current.createSpan({
+			cls: "newtab-search-provider-current-label",
+			text: "Selected: ",
+		});
+		current.createSpan({
+			cls: "newtab-search-provider-current-value",
+			text: display,
+		});
+	}
+
 	display(): void {
 		const { containerEl } = this;
 
@@ -242,18 +262,12 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		new Setting(containerEl)
+		const topLeftSearchProviderSetting = new Setting(containerEl)
 			.setName("Top left search provider")
 			.setDesc(
 				`Which plugin should be utilized for search when clicking the top left button?`
 			)
-			.setClass("search-provider")
-			.addText((component) => {
-				component.setValue(
-					this.plugin.settings.topLeftSearchProvider.display
-				);
-				component.setDisabled(true);
-			})
+			.setClass("newtab-search-provider")
 			.addButton((component) => {
 				component.setButtonText("Change");
 				component.setTooltip("Choose search provider");
@@ -272,6 +286,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					).open();
 				});
 			});
+		this.renderSelectedProvider(
+			topLeftSearchProviderSetting,
+			this.plugin.settings.topLeftSearchProvider.display
+		);
 
 		new Setting(containerEl)
 			.setName("Show inline search")
@@ -290,18 +308,12 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		new Setting(containerEl)
+		const inlineSearchProviderSetting = new Setting(containerEl)
 			.setName("Inline search provider")
 			.setDesc(
 				`Which plugin should be utilized for search when clicking the middle of the screen button?`
 			)
-			.setClass("search-provider")
-
-			.addText((component) => {
-				component
-					.setValue(this.plugin.settings.inlineSearchProvider.display)
-					.setDisabled(true);
-			})
+			.setClass("newtab-search-provider")
 			.addButton((component) => {
 				component.setButtonText("Change");
 				component.setTooltip("Choose search provider");
@@ -320,6 +332,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					).open();
 				});
 			});
+		this.renderSelectedProvider(
+			inlineSearchProviderSetting,
+			this.plugin.settings.inlineSearchProvider.display
+		);
 
 		/****************************************
 		 * Time settings
