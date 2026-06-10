@@ -267,6 +267,7 @@ const App = ({
 											key={file.path}
 											className="newtab-recentlyedited-file"
 											data-path={file.path}
+											aria-label={file.basename}
 											onClick={() => {
 												const leaf =
 													obsidian?.workspace.getMostRecentLeaf();
@@ -293,6 +294,7 @@ const App = ({
 											key={file.path}
 											className="newtab-recentlyedited-file"
 											data-path={file.path}
+											aria-label={file.basename}
 											onClick={() => {
 												const leaf =
 													obsidian?.workspace.getMostRecentLeaf();
