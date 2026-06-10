@@ -2,6 +2,7 @@ import { requestUrl } from "obsidian";
 import { BackgroundTheme } from "src/Types/Enums";
 import getEasterDate from "./getEasterDate";
 import { isWithinDaysBefore } from "./isWithinXDays";
+import { debugLog } from "./debug";
 
 /**
  * SecretStorage ID under which the user's Unsplash access key is stored. Only
@@ -200,35 +201,64 @@ const fetchUnsplashBackground = async (
 
 	const cached = readCache(cacheKey);
 	if (cached) {
+		debugLog("background", `cache hit for "${query}" — using today's image`);
 		return cached;
 	}
 
 	if (!accessKey) {
+		debugLog(
+			"background",
+			`no Unsplash access key set — no image. Add one in Settings → Background (query was "${query}").`
+		);
 		return null;
 	}
 
+	const endpoint = `https://api.unsplash.com/photos/random?orientation=landscape&query=${encodeURIComponent(
+		query
+	)}`;
+
 	try {
+		debugLog("background", `requesting Unsplash for "${query}"`, endpoint);
 		const res = await requestUrl({
-			url: `https://api.unsplash.com/photos/random?orientation=landscape&query=${encodeURIComponent(
-				query
-			)}`,
+			url: endpoint,
 			headers: { Authorization: `Client-ID ${accessKey}` },
 			throw: false,
 		});
 
+		const remaining = res.headers?.["x-ratelimit-remaining"];
+		debugLog(
+			"background",
+			`Unsplash responded status ${res.status}` +
+				(remaining ? `, ratelimit-remaining ${remaining}` : "")
+		);
+
 		if (res.status !== 200) {
+			// 401 = invalid/missing access key, 403 = rate limit exhausted,
+			// 404 = no photo for that query. The body carries Unsplash's reason.
+			debugLog(
+				"background",
+				`non-200 from Unsplash (${res.status}) — no image. Body:`,
+				res.text
+			);
 			return null;
 		}
 
 		const url = (res.json as { urls?: { regular?: string } })?.urls
 			?.regular;
 		if (!url) {
+			debugLog(
+				"background",
+				"200 OK but no urls.regular in the response — no image. Body:",
+				res.json
+			);
 			return null;
 		}
 
+		debugLog("background", `resolved image for "${query}"`, url);
 		writeCache(cacheKey, url);
 		return url;
-	} catch {
+	} catch (error) {
+		debugLog("background", "request threw (network/offline?) — no image", error);
 		return null;
 	}
 };
@@ -248,6 +278,12 @@ const getBackground = async (
 	localBackgrounds: string[],
 	unsplashAccessKey: string | null
 ): Promise<string | null> => {
+	debugLog(
+		"background",
+		`resolving theme="${backgroundTheme}", hasKey=${Boolean(
+			unsplashAccessKey
+		)}, customTopic="${customTopic}"`
+	);
 	switch (backgroundTheme) {
 		case BackgroundTheme.SEASONS_AND_HOLIDAYS:
 			return fetchUnsplashBackground(

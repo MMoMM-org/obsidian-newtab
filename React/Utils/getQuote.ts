@@ -1,6 +1,7 @@
 import { requestUrl } from "obsidian";
 import { QUOTE_SOURCE } from "src/Types/Enums";
 import { CustomQuote } from "src/Types/Interfaces";
+import { debugLog } from "./debug";
 
 export interface Quote {
 	content: string;
@@ -24,12 +25,16 @@ const EMPTY_QUOTE: Quote = { content: "", author: "" };
  */
 const fetchOnlineQuote = async (): Promise<Quote | null> => {
 	try {
+		debugLog("quote", "requesting ZenQuotes", "https://zenquotes.io/api/random");
 		const res = await requestUrl({
 			url: "https://zenquotes.io/api/random",
 			throw: false,
 		});
 
+		debugLog("quote", `ZenQuotes responded status ${res.status}`);
+
 		if (res.status !== 200) {
+			debugLog("quote", `non-200 (${res.status}) — falling back. Body:`, res.text);
 			return null;
 		}
 
@@ -38,17 +43,21 @@ const fetchOnlineQuote = async (): Promise<Quote | null> => {
 		const first = Array.isArray(body) ? body[0] : undefined;
 
 		if (!first?.q || !first?.a) {
+			debugLog("quote", "malformed body (no q/a) — falling back. Body:", res.json);
 			return null;
 		}
 
 		// When rate-limited, ZenQuotes returns a sentinel "quote" attributed
 		// to zenquotes.io — treat that as a failure rather than showing it.
 		if (first.a === "zenquotes.io") {
+			debugLog("quote", "rate-limit sentinel from ZenQuotes — falling back");
 			return null;
 		}
 
+		debugLog("quote", `resolved quote by ${first.a}`);
 		return { content: first.q, author: first.a, fromZenQuotes: true };
-	} catch {
+	} catch (error) {
+		debugLog("quote", "request threw (network/offline?) — falling back", error);
 		return null;
 	}
 };

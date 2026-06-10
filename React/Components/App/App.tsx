@@ -10,6 +10,7 @@ import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
 import getQuote, { Quote } from "React/Utils/getQuote";
 import { BackgroundTheme } from "src/Types/Enums";
+import { debugLog } from "React/Utils/debug";
 
 /**
  * Given an icon name, converts a Obsidian icon to a usable SVG string and embeds it into a span.
@@ -59,6 +60,13 @@ const App = ({
 			accessKey
 		).then((url) => {
 			if (!cancelled) {
+				debugLog(
+					"background",
+					url
+						? "applying background image"
+						: "no background image resolved (url=null)",
+					url
+				);
 				setBackground(url);
 			}
 		});
