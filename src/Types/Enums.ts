@@ -25,7 +25,7 @@ export enum BOOKMARK_SOURCE {
 }
 
 export enum QUOTE_SOURCE {
-	QUOTEABLE = "Quoteable",
+	ONLINE = "Online quotes",
 	MY_QUOTES = "My quotes",
 	BOTH = "Both",
 }

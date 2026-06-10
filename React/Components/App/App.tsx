@@ -257,12 +257,12 @@ const App = ({
 					)}
 				</div>
 				<div className="newtab-quote">
-					{quote && settings.showQuote && (
+					{quote?.content && settings.showQuote && (
 						<div className="newtab-quote-content">
 							&quot;{quote.content}&quot;
 						</div>
 					)}
-					{quote && settings.showQuote && (
+					{quote?.content && settings.showQuote && (
 						<div className="newtab-quote-author">
 							{quote.author}
 						</div>

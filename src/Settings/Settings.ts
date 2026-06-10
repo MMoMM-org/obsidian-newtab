@@ -66,7 +66,7 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	bookmarkSource: BOOKMARK_SOURCE.ALL,
 	bookmarkGroup: "",
 	showQuote: true,
-	quoteSource: QUOTE_SOURCE.QUOTEABLE,
+	quoteSource: QUOTE_SOURCE.ONLINE,
 	customQuotes: [],
 };
 
