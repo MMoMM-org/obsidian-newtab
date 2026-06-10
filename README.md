@@ -55,6 +55,9 @@ This mirrors the build into the vault's plugin folder with a dev-stamped version
 so Obsidian reloads the bundle on every build. The canonical `manifest.json` is
 never modified.
 
+For how this repo was scaffolded, the deliberate decisions, inherited fork-debt,
+and known issues, see [docs/scaffolding-and-findings.md](docs/scaffolding-and-findings.md).
+
 ## Privacy
 
 New Tab is local-first and makes only a few optional, toggleable network requests
