@@ -8,6 +8,7 @@ export enum BackgroundTheme {
 	LAKES = "lakes",
 	FOREST = "forest",
 	ANIMALS = "animals",
+	CUSTOM_TOPIC = "custom topic",
 	CUSTOM = "custom",
 	LOCAL = "local",
 	TRANSPARENT = "transparent",

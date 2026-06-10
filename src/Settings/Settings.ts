@@ -38,6 +38,7 @@ export const SEARCH_PROVIDER = [
 export interface NewTabPluginSettings {
 	backgroundTheme: BackgroundTheme;
 	customBackground: string;
+	customTopic: string;
 	localBackgrounds: string[];
 	showTopLeftSearchButton: boolean;
 	topLeftSearchProvider: SearchProvider;
@@ -59,6 +60,7 @@ export interface NewTabPluginSettings {
 export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	backgroundTheme: BackgroundTheme.SEASONS_AND_HOLIDAYS,
 	customBackground: "",
+	customTopic: "",
 	localBackgrounds: [],
 	showTopLeftSearchButton: true,
 	topLeftSearchProvider: DEFAULT_SEARCH_PROVIDER,
@@ -165,6 +167,27 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				// the key changed (the key itself is not part of settings).
 				this.plugin.settingsObservable.setValue(this.plugin.settings);
 			});
+		}
+
+		if (
+			this.plugin.settings.backgroundTheme ===
+			BackgroundTheme.CUSTOM_TOPIC
+		) {
+			new Setting(containerEl)
+				.setName("Custom topic")
+				.setDesc(
+					`Search term(s) used to pick a random Unsplash photo, e.g. "ocean sunset" or "tokyo at night".`
+				)
+				.addText((component) => {
+					component.setValue(this.plugin.settings.customTopic);
+					component.onChange((value) => {
+						this.plugin.settings.customTopic = value;
+						this.plugin.settingsObservable.setValue(
+							this.plugin.settings
+						);
+						this.plugin.saveSettings();
+					});
+				});
 		}
 
 		if (this.plugin.settings.backgroundTheme === BackgroundTheme.CUSTOM) {

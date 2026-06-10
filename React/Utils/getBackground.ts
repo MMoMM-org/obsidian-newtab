@@ -244,6 +244,7 @@ const fetchUnsplashBackground = async (
 const getBackground = async (
 	backgroundTheme: BackgroundTheme,
 	customBackground: string,
+	customTopic: string,
 	localBackgrounds: string[],
 	unsplashAccessKey: string | null
 ): Promise<string | null> => {
@@ -253,6 +254,10 @@ const getBackground = async (
 				getSeasonalTag(new Date()) ?? SEASONAL_THEME.SUMMER,
 				unsplashAccessKey
 			);
+		case BackgroundTheme.CUSTOM_TOPIC:
+			return customTopic.trim()
+				? fetchUnsplashBackground(customTopic.trim(), unsplashAccessKey)
+				: null;
 		case BackgroundTheme.CUSTOM:
 			return customBackground;
 		case BackgroundTheme.LOCAL:

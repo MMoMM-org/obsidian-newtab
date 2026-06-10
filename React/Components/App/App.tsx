@@ -54,6 +54,7 @@ const App = ({
 		void getBackground(
 			settings.backgroundTheme,
 			settings.customBackground,
+			settings.customTopic,
 			settings.localBackgrounds,
 			accessKey
 		).then((url) => {
