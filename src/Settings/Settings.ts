@@ -1,6 +1,6 @@
 import fs from "fs";
 import { getBookmarkGroups } from "React/Utils/getBookmarks";
-import { setDebugLogging } from "React/Utils/debug";
+import { debugLog, setDebugLogging } from "React/Utils/debug";
 import NewTabPlugin from "main";
 import {
 	App,
@@ -661,7 +661,18 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Debug logging")
 			.setDesc(
-				`Log background and quote provider activity (Unsplash, ZenQuotes) to the developer console. Leave off unless you're troubleshooting.`
+				createFragment((frag) => {
+					frag.appendText(
+						"Log background and quote provider activity (Unsplash, ZenQuotes) to the developer console. Leave off unless you're troubleshooting — see the "
+					);
+					frag.createEl("a", {
+						text: "troubleshooting guide",
+						href: "https://github.com/MMoMM-org/obsidian-newtab/blob/main/docs/troubleshooting.md",
+					});
+					frag.appendText(
+						". Takes effect immediately; open a new tab to see log lines."
+					);
+				})
 			)
 			.addToggle((component) => {
 				component.setValue(this.plugin.settings.debugLogging);
@@ -669,6 +680,14 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settings.debugLogging = value;
 					setDebugLogging(value);
 					this.plugin.saveSettings();
+					// Immediate console feedback so it's obvious the toggle did
+					// something even before a new tab is opened.
+					if (value) {
+						debugLog(
+							"debug",
+							"logging enabled — open a new tab to see provider activity"
+						);
+					}
 				});
 			});
 	}
