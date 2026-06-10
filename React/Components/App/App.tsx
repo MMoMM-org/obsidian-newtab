@@ -6,6 +6,7 @@ import Observable from "src/Utils/Observable";
 import NewTabPlugin from "main";
 import getBackground from "React/Utils/getBackground";
 import getTimeOfDayGreeting from "React/Utils/getTimeOfDayGreeting";
+import { resolveGreetingLocale } from "React/Utils/greetings";
 import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
 import getQuote, { Quote } from "React/Utils/getQuote";
@@ -238,7 +239,11 @@ const App = ({
 						<div className="newtab-greeting">
 							{settings.greetingText.replace(
 								/{{greeting}}/gi,
-								getTimeOfDayGreeting()
+								getTimeOfDayGreeting(
+									resolveGreetingLocale(
+										settings.greetingLanguage
+									)
+								)
 							)}
 						</div>
 					)}

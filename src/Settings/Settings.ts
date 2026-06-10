@@ -1,6 +1,11 @@
 import fs from "fs";
 import { getBookmarkGroups } from "React/Utils/getBookmarks";
 import { debugLog, setDebugLogging } from "React/Utils/debug";
+import {
+	GREETINGS,
+	LANGUAGE_LABELS,
+	GREETING_LANGUAGE_AUTO,
+} from "React/Utils/greetings";
 import NewTabPlugin from "main";
 import {
 	App,
@@ -52,6 +57,7 @@ export interface NewTabPluginSettings {
 	timeFormat: TIME_FORMAT;
 	showGreeting: boolean;
 	greetingText: string;
+	greetingLanguage: string;
 	showInlineSearch: boolean;
 	inlineSearchProvider: SearchProvider;
 	showRecentFiles: boolean;
@@ -76,6 +82,7 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	timeFormat: TIME_FORMAT.TWELVE_HOUR,
 	showGreeting: true,
 	greetingText: "Hello, Beautiful.",
+	greetingLanguage: GREETING_LANGUAGE_AUTO,
 	showInlineSearch: true,
 	inlineSearchProvider: DEFAULT_SEARCH_PROVIDER,
 	showRecentFiles: true,
@@ -496,6 +503,31 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				component.setValue(this.plugin.settings.greetingText);
 				component.onChange((value) => {
 					this.plugin.settings.greetingText = value;
+					this.plugin.settingsObservable.setValue(
+						this.plugin.settings
+					);
+					this.plugin.saveSettings();
+				});
+			});
+
+		new Setting(containerEl)
+			.setName("Greeting language")
+			.setDesc(
+				`Language for the {{greeting}} time-of-day phrase. Auto follows Obsidian's display language; pick a specific language to greet in a different one (e.g. English Obsidian, German greeting).`
+			)
+			.addDropdown((component) => {
+				component.addOption(
+					GREETING_LANGUAGE_AUTO,
+					"Auto (follow Obsidian)"
+				);
+				for (const code of Object.keys(GREETINGS)) {
+					component.addOption(code, LANGUAGE_LABELS[code] ?? code);
+				}
+
+				component.setValue(this.plugin.settings.greetingLanguage);
+
+				component.onChange((value) => {
+					this.plugin.settings.greetingLanguage = value;
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);

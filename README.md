@@ -58,6 +58,15 @@ never modified.
 For how this repo was scaffolded, the deliberate decisions, inherited fork-debt,
 and known issues, see [docs/scaffolding-and-findings.md](docs/scaffolding-and-findings.md).
 
+### Adding a greeting language
+
+The `{{greeting}}` time-of-day phrase is translated per language in
+[`React/Utils/greetings.ts`](React/Utils/greetings.ts). To add yours, add one
+entry to `GREETINGS` (keyed by Obsidian's locale code, e.g. `de`) with the
+morning/afternoon/evening phrases, plus a matching name in `LANGUAGE_LABELS` —
+then open a PR. Nothing else needs to change; it appears in the **Greeting
+language** dropdown automatically.
+
 ## Privacy
 
 New Tab is local-first and makes only a few optional, toggleable network requests
