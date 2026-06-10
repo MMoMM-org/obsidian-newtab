@@ -4,7 +4,7 @@ import { TFile, getIcon } from "obsidian";
 import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
 import NewTabPlugin from "main";
-import getBackground, { UNSPLASH_SECRET_ID } from "React/Utils/getBackground";
+import getBackground from "React/Utils/getBackground";
 import getTimeOfDayGreeting from "React/Utils/getTimeOfDayGreeting";
 import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
@@ -49,9 +49,12 @@ const App = ({
 	const [background, setBackground] = useState<string | null>(null);
 	useEffect(() => {
 		let cancelled = false;
-		// The Unsplash key lives in SecretStorage, not in the synced settings.
-		const accessKey =
-			obsidian?.secretStorage.getSecret(UNSPLASH_SECRET_ID) ?? null;
+		// The Unsplash key lives in SecretStorage under the user-chosen ID; only
+		// that ID is persisted in settings. Resolve it to the live value here.
+		const secretId = settings.unsplashKeySecretId;
+		const accessKey = secretId
+			? obsidian?.secretStorage.getSecret(secretId) ?? null
+			: null;
 		void getBackground(
 			settings.backgroundTheme,
 			settings.customBackground,

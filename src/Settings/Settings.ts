@@ -1,6 +1,5 @@
 import fs from "fs";
 import { getBookmarkGroups } from "React/Utils/getBookmarks";
-import { UNSPLASH_SECRET_ID } from "React/Utils/getBackground";
 import NewTabPlugin from "main";
 import {
 	App,
@@ -39,6 +38,12 @@ export interface NewTabPluginSettings {
 	backgroundTheme: BackgroundTheme;
 	customBackground: string;
 	customTopic: string;
+	/**
+	 * SecretStorage ID (the name the user gives the secret) under which the
+	 * Unsplash access key is stored. Only this ID lives in data.json; the key
+	 * value itself stays in Obsidian's secret store. Empty when unset.
+	 */
+	unsplashKeySecretId: string;
 	localBackgrounds: string[];
 	showTopLeftSearchButton: boolean;
 	topLeftSearchProvider: SearchProvider;
@@ -61,6 +66,7 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	backgroundTheme: BackgroundTheme.SEASONS_AND_HOLIDAYS,
 	customBackground: "",
 	customTopic: "",
+	unsplashKeySecretId: "",
 	localBackgrounds: [],
 	showTopLeftSearchButton: true,
 	topLeftSearchProvider: DEFAULT_SEARCH_PROVIDER,
@@ -163,24 +169,20 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 						);
 					})
 				);
+			// SecretComponent manages the secret in Obsidian's keystore itself:
+			// setValue/onChange operate on the secret ID (the name the user gives
+			// it), NOT the raw value. We persist only that ID and resolve the
+			// live key at use-time via secretStorage.getSecret(id).
 			const secret = new SecretComponent(
 				this.app,
 				unsplashKeySetting.controlEl
 			);
-			const existingKey =
-				this.app.secretStorage.getSecret(UNSPLASH_SECRET_ID);
-			if (existingKey) {
-				secret.setValue(existingKey);
-			}
-			secret.onChange((value) => {
-				// onChange fires with null when the field is cleared; trim so a
-				// stray newline/space from pasting can't cause a 401 from Unsplash.
-				this.app.secretStorage.setSecret(
-					UNSPLASH_SECRET_ID,
-					(value ?? "").trim()
-				);
+			secret.setValue(this.plugin.settings.unsplashKeySecretId);
+			secret.onChange((id) => {
+				this.plugin.settings.unsplashKeySecretId = id ?? "";
+				this.plugin.saveSettings();
 				// Nudge the new-tab view to re-resolve the background now that
-				// the key changed (the key itself is not part of settings).
+				// the configured secret changed.
 				this.plugin.settingsObservable.setValue(this.plugin.settings);
 			});
 		}

@@ -4,12 +4,6 @@ import getEasterDate from "./getEasterDate";
 import { isWithinDaysBefore } from "./isWithinXDays";
 import { debugLog } from "./debug";
 
-/**
- * SecretStorage ID under which the user's Unsplash access key is stored. Only
- * this ID lives in data.json — the key value itself stays in SecretStorage.
- */
-export const UNSPLASH_SECRET_ID = "unsplash-access-key";
-
 enum MONTH {
 	JANUARY = 1,
 	FEBUARY = 2,
