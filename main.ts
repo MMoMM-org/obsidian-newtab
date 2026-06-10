@@ -1,4 +1,4 @@
-import { Notice, Plugin, requestUrl } from "obsidian";
+import { Notice, Plugin, TFile, WorkspaceLeaf, requestUrl } from "obsidian";
 import { ReactView, NEWTAB_REACT_VIEW } from "./Views/ReactView";
 import Observable from "src/Utils/Observable";
 import {
@@ -11,6 +11,10 @@ import { setDebugLogging } from "React/Utils/debug";
 export default class NewTabPlugin extends Plugin {
 	settings: NewTabPluginSettings;
 	settingsObservable: Observable;
+	/** Path of a just-created note, awaiting its file-open to confirm intent. */
+	private pendingNewFilePath: string | null = null;
+	/** NewTab leaf active when a note was created — the one to replace. */
+	private leafToReplace: WorkspaceLeaf | null = null;
 
 	async onload() {
 		await this.loadSettings();
@@ -35,6 +39,48 @@ export default class NewTabPlugin extends Plugin {
 				"layout-change",
 				this.onLayoutChange.bind(this)
 			)
+		);
+
+		// Make "Create new note" (command or Cmd/Ctrl+N) replace the NewTab it's
+		// run from, instead of opening a separate tab beside it — Obsidian only
+		// auto-replaces leaves of view type "empty", and ours is custom.
+		//
+		// When a file is created, capture the leaf active *right now* (before
+		// the note opens) if it's a NewTab. When that exact file then opens (a
+		// genuine new note), detach the captured leaf. Capturing at create time
+		// is reliable for both the command and the hotkey, whereas tracking via
+		// active-leaf-change misses NewTab leaves hijacked from an empty tab.
+		this.registerEvent(
+			this.app.vault.on("create", (file) => {
+				if (!(file instanceof TFile) || file.extension !== "md") {
+					return;
+				}
+				this.pendingNewFilePath = file.path;
+				const active = this.app.workspace.getMostRecentLeaf();
+				this.leafToReplace =
+					active?.view instanceof ReactView ? active : null;
+			})
+		);
+
+		this.registerEvent(
+			this.app.workspace.on("file-open", (file) => {
+				const created = this.pendingNewFilePath;
+				const leaf = this.leafToReplace;
+				this.pendingNewFilePath = null;
+				this.leafToReplace = null;
+				// Only act on the note that was just created (not on opening an
+				// existing file), and only if it didn't already replace the
+				// NewTab in place (then the captured leaf is no longer a NewTab).
+				if (!file || !created || file.path !== created || !leaf) {
+					return;
+				}
+				if (
+					leaf !== this.app.workspace.getMostRecentLeaf() &&
+					leaf.view instanceof ReactView
+				) {
+					leaf.detach();
+				}
+			})
 		);
 
 		if (process.env.NODE_ENV === "development") {
