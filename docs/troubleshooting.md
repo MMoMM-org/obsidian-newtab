@@ -46,6 +46,16 @@ set the quote source to **My quotes**.
 On load the plugin checks GitHub for a newer version. On a private repository
 the check is skipped silently and never blocks anything.
 
-## The settings dialog looked broken when I disabled the plugin
+## Known issue: disabling the plugin while a New Tab is the active tab
 
-Fixed — update to the latest build.
+If you disable (or update) the plugin while a New Tab pane is the **focused,
+active tab**, the Settings window closes and that tab disappears.
+
+This is a teardown edge case: Obsidian detaches the active leaf as it unloads
+the plugin, and our custom view type is gone by then, so there's nothing to
+fall back to in place. It throws no error and **causes no data loss** — your
+notes and settings are untouched.
+
+**Workaround:** click any other note or tab first (so a New Tab isn't the
+active pane), then disable or update the plugin. Re-enabling restores the New
+Tab behavior normally.
