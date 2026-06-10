@@ -94,18 +94,21 @@ const App = ({
 		settings.unsplashKeySecretId,
 	]);
 
-	const allVaultFiles = obsidian?.vault.getAllLoadedFiles();
-	const latestModifiedMarkdownFiles = useMemo(() => {
-		const files = allVaultFiles?.filter(
-			(file) => file instanceof TFile && file.extension === "md"
-		);
-		files?.sort((a, b) =>
-			a instanceof TFile && b instanceof TFile
-				? b.stat.mtime - a.stat.mtime
-				: 0
-		);
-		return files?.slice(0, 5);
-	}, [allVaultFiles]);
+	// "Recent files" must reflect what the user actually opened most recently,
+	// not what changed on disk. getLastOpenFiles() is Obsidian's own recently-
+	// opened history (most-recent first). The previous approach sorted every
+	// markdown file by stat.mtime, which surfaced sync/background edits and
+	// missed notes that were only viewed, not modified.
+	const recentFiles = useMemo(() => {
+		const recentPaths = obsidian?.workspace.getLastOpenFiles() ?? [];
+		return recentPaths
+			.map((path) => obsidian?.vault.getFileByPath(path))
+			.filter(
+				(file): file is TFile =>
+					file instanceof TFile && file.extension === "md"
+			)
+			.slice(0, 5);
+	}, [obsidian]);
 
 	const bookmarks = useMemo(
 		() => getBookmarks(obsidian, settings).slice(0, 5),
@@ -260,7 +263,7 @@ const App = ({
 					</div>
 					{settings.showRecentFiles && (
 						<div className="newtab-recentlyedited">
-							{latestModifiedMarkdownFiles?.map(
+							{recentFiles.map(
 								(file) =>
 									file instanceof TFile && (
 										<a
