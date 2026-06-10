@@ -10,11 +10,11 @@
  * whether a key is present.
  */
 
-let debugEnabled = true;
+let debugEnabled = false;
 
 /**
- * Enable or disable provider debug logging. Wire this to a settings switch
- * later; defaults to on so the providers are diagnosable out of the box.
+ * Enable or disable provider debug logging. Wired to the "Debug logging"
+ * settings toggle; off by default so a released plugin stays quiet.
  */
 export const setDebugLogging = (enabled: boolean): void => {
 	debugEnabled = enabled;

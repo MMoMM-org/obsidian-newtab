@@ -1,5 +1,6 @@
 import fs from "fs";
 import { getBookmarkGroups } from "React/Utils/getBookmarks";
+import { setDebugLogging } from "React/Utils/debug";
 import NewTabPlugin from "main";
 import {
 	App,
@@ -60,6 +61,7 @@ export interface NewTabPluginSettings {
 	showQuote: boolean;
 	quoteSource: QUOTE_SOURCE;
 	customQuotes: CustomQuote[];
+	debugLogging: boolean;
 }
 
 export const DEFAULT_SETTINGS: NewTabPluginSettings = {
@@ -83,6 +85,7 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	showQuote: true,
 	quoteSource: QUOTE_SOURCE.ONLINE,
 	customQuotes: [],
+	debugLogging: false,
 };
 
 export class NewTabPluginSettingTab extends PluginSettingTab {
@@ -647,6 +650,25 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 							this.display();
 						}
 					).open();
+				});
+			});
+
+		/****************************************
+		 * Debug settings
+		 ***************************************/
+		new Setting(containerEl).setHeading().setName(`Debug settings`);
+
+		new Setting(containerEl)
+			.setName("Debug logging")
+			.setDesc(
+				`Log background and quote provider activity (Unsplash, ZenQuotes) to the developer console. Leave off unless you're troubleshooting.`
+			)
+			.addToggle((component) => {
+				component.setValue(this.plugin.settings.debugLogging);
+				component.onChange((value) => {
+					this.plugin.settings.debugLogging = value;
+					setDebugLogging(value);
+					this.plugin.saveSettings();
 				});
 			});
 	}

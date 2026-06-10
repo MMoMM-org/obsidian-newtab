@@ -6,6 +6,7 @@ import {
 	NewTabPluginSettings,
 	DEFAULT_SETTINGS,
 } from "src/Settings/Settings";
+import { setDebugLogging } from "React/Utils/debug";
 
 export default class NewTabPlugin extends Plugin {
 	settings: NewTabPluginSettings;
@@ -13,6 +14,9 @@ export default class NewTabPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		// Apply the persisted debug-logging preference before anything logs.
+		setDebugLogging(this.settings.debugLogging);
 
 		this.versionCheck();
 
