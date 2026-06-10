@@ -58,7 +58,13 @@ export class ReactView extends FileView {
 		// fire afterwards and wipe whatever Obsidian put there, blanking the
 		// pane with no error. Clearing contentEl is the standard React-in-
 		// Obsidian teardown.
-		this.root?.unmount();
+		// The try/catch guards React's "synchronous unmount while rendering"
+		// throw, which Obsidian's disable path otherwise lets break the UI.
+		try {
+			this.root?.unmount();
+		} catch {
+			// Already torn down / mid-render — safe to ignore.
+		}
 		this.root = null;
 		this.contentEl.empty();
 	}
