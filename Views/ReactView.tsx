@@ -52,6 +52,16 @@ export class ReactView extends FileView {
 	}
 
 	async onClose() {
-		this.root?.unmount();
+		// Defer the React unmount out of the current call stack. Obsidian tears
+		// the view down from inside a workspace render/layout cycle (notably
+		// when the plugin is disabled from the settings pane), and unmounting a
+		// root synchronously there throws "Attempted to synchronously unmount a
+		// root while React was already rendering" — which bubbles up and breaks
+		// the settings dialog. A 0ms timeout moves it to a clean tick.
+		const root = this.root;
+		this.root = null;
+		if (root) {
+			setTimeout(() => root.unmount());
+		}
 	}
 }

@@ -33,8 +33,11 @@ class Observable {
 		this.subscribers.push(callback);
 
 		return () => {
+			// Remove the unsubscribing callback — keep all the others. (This
+			// was inverted, so unsubscribe dropped every *other* subscriber and
+			// left the unmounted one attached, leaking stale setState calls.)
 			this.subscribers = this.subscribers.filter(
-				(value) => value === callback
+				(value) => value !== callback
 			);
 		};
 	}
