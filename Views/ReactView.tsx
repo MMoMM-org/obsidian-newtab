@@ -52,16 +52,14 @@ export class ReactView extends FileView {
 	}
 
 	async onClose() {
-		// Defer the React unmount out of the current call stack. Obsidian tears
-		// the view down from inside a workspace render/layout cycle (notably
-		// when the plugin is disabled from the settings pane), and unmounting a
-		// root synchronously there throws "Attempted to synchronously unmount a
-		// root while React was already rendering" — which bubbles up and breaks
-		// the settings dialog. A 0ms timeout moves it to a clean tick.
-		const root = this.root;
+		// Unmount synchronously, before Obsidian reuses this leaf. When the
+		// NewTab view is the active leaf and the plugin is disabled, Obsidian
+		// re-renders the leaf immediately; a deferred (setTimeout) unmount would
+		// fire afterwards and wipe whatever Obsidian put there, blanking the
+		// pane with no error. Clearing contentEl is the standard React-in-
+		// Obsidian teardown.
+		this.root?.unmount();
 		this.root = null;
-		if (root) {
-			setTimeout(() => root.unmount());
-		}
+		this.contentEl.empty();
 	}
 }
