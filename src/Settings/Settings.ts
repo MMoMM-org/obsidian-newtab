@@ -150,7 +150,18 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			const unsplashKeySetting = new Setting(containerEl)
 				.setName("Unsplash access key")
 				.setDesc(
-					`Required for themed backgrounds. Create a free app at unsplash.com/oauth/applications, then paste its access key here. Stored securely outside your settings file.`
+					createFragment((frag) => {
+						frag.appendText(
+							"Required for themed backgrounds. Create a free app at "
+						);
+						frag.createEl("a", {
+							text: "unsplash.com/oauth/applications",
+							href: "https://unsplash.com/oauth/applications",
+						});
+						frag.appendText(
+							", then paste its access key here. Stored securely outside your settings file."
+						);
+					})
 				);
 			const secret = new SecretComponent(
 				this.app,
