@@ -25,8 +25,19 @@ export enum BOOKMARK_SOURCE {
 	GROUP = "group",
 }
 
+/**
+ * Legacy single-source selector. Superseded by the per-source toggles
+ * (quoteUseOnline / quoteUseMyQuotes / quoteUseVaultNotes); kept only so old
+ * data.json values can be migrated on load. See migrateQuoteSources.
+ */
 export enum QUOTE_SOURCE {
 	ONLINE = "Online quotes",
 	MY_QUOTES = "My quotes",
 	BOTH = "Both",
+}
+
+/** How vault notes are selected as quote sources. */
+export enum VAULT_QUOTE_SELECTION {
+	TAG = "tag",
+	PATH = "path",
 }

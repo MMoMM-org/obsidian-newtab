@@ -10,6 +10,7 @@ import { resolveGreetingLocale } from "React/Utils/greetings";
 import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
 import getQuote, { Quote } from "React/Utils/getQuote";
+import { getVaultQuotes } from "React/Utils/getVaultQuotes";
 import { BackgroundTheme } from "src/Types/Enums";
 import { debugLog } from "React/Utils/debug";
 
@@ -130,16 +131,48 @@ const App = ({
 		};
 	}, [setTime, settings]);
 
+	// Resolve quotes from vault notes (frontmatter) whenever the selection
+	// config changes; cheap, reads only the metadata cache.
+	const vaultQuotes = useMemo(
+		() =>
+			getVaultQuotes(obsidian, {
+				selectionMode: settings.quoteVaultSelectionMode,
+				tag: settings.quoteVaultTag,
+				folder: settings.quoteVaultFolder,
+				contentProperty: settings.quoteVaultContentProperty,
+				authorProperty: settings.quoteVaultAuthorProperty,
+			}),
+		[
+			obsidian,
+			settings.quoteVaultSelectionMode,
+			settings.quoteVaultTag,
+			settings.quoteVaultFolder,
+			settings.quoteVaultContentProperty,
+			settings.quoteVaultAuthorProperty,
+		]
+	);
+
 	/**
-	 * Get a random quote
+	 * Get a random quote from whichever sources are enabled.
 	 */
 	useEffect(() => {
-		getQuote(settings.quoteSource, settings.customQuotes).then(
-			(newQuote: any) => {
-				setQuote(newQuote);
-			}
-		);
-	}, [setQuote, settings.quoteSource, settings.customQuotes]);
+		void getQuote({
+			useOnline: settings.quoteUseOnline,
+			useMyQuotes: settings.quoteUseMyQuotes,
+			useVaultNotes: settings.quoteUseVaultNotes,
+			customQuotes: settings.customQuotes,
+			vaultQuotes,
+		}).then((newQuote: Quote) => {
+			setQuote(newQuote);
+		});
+	}, [
+		setQuote,
+		settings.quoteUseOnline,
+		settings.quoteUseMyQuotes,
+		settings.quoteUseVaultNotes,
+		settings.customQuotes,
+		vaultQuotes,
+	]);
 
 	/**
 	 * Subscribe to settings from Obsidian

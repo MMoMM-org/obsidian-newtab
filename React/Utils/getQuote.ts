@@ -1,5 +1,4 @@
 import { requestUrl } from "obsidian";
-import { QUOTE_SOURCE } from "src/Types/Enums";
 import { CustomQuote } from "src/Types/Interfaces";
 import { debugLog } from "./debug";
 
@@ -62,9 +61,13 @@ const fetchOnlineQuote = async (): Promise<Quote | null> => {
 	}
 };
 
-/**
- * Pick a random custom quote, or null when the user has none configured.
- */
+/** Pick a random quote from a pre-resolved list, or null when empty. */
+const pickRandom = (quotes: Quote[]): Quote | null =>
+	quotes.length
+		? quotes[Math.floor(Math.random() * quotes.length)]
+		: null;
+
+/** Pick a random custom quote, or null when the user has none configured. */
 const pickCustomQuote = (customQuotes: CustomQuote[]): Quote | null => {
 	if (!customQuotes.length) {
 		return null;
@@ -76,43 +79,65 @@ const pickCustomQuote = (customQuotes: CustomQuote[]): Quote | null => {
 	return { content: picked.text, author: picked.author };
 };
 
+/** Return a copy of the array in a random order (Fisher–Yates). */
+const shuffle = <T>(items: T[]): T[] => {
+	const copy = [...items];
+	for (let i = copy.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[copy[i], copy[j]] = [copy[j], copy[i]];
+	}
+	return copy;
+};
+
+/** Enabled quote sources and their already-resolved content. */
+export interface QuoteSources {
+	useOnline: boolean;
+	useMyQuotes: boolean;
+	useVaultNotes: boolean;
+	customQuotes: CustomQuote[];
+	/** Quotes resolved from vault notes (see getVaultQuotes). */
+	vaultQuotes: Quote[];
+}
+
 /**
- * Based on the configured quoteSource, returns a random quote from the online
- * source (ZenQuotes), the user's custom quotes, or both. Never throws: on
- * failure it falls back to the other source and finally to an empty quote.
- * @param quoteSource
- * @param customQuotes
+ * Returns a random quote from the union of the enabled sources (online
+ * ZenQuotes, the user's custom quotes, and/or vault notes). Sources are tried
+ * in a random order so the result is evenly mixed; the first that yields a
+ * quote wins. Never throws — falls back through the remaining sources and
+ * finally to an empty quote.
  */
-const getQuote = async (
-	quoteSource: QUOTE_SOURCE,
-	customQuotes: CustomQuote[]
-): Promise<Quote> => {
-	if (quoteSource === QUOTE_SOURCE.MY_QUOTES) {
-		return pickCustomQuote(customQuotes) ?? EMPTY_QUOTE;
-	}
-
-	if (quoteSource === QUOTE_SOURCE.ONLINE) {
-		return (
-			(await fetchOnlineQuote()) ??
-			pickCustomQuote(customQuotes) ??
-			EMPTY_QUOTE
-		);
-	}
-
-	// BOTH: pick one source at random, fall back to the other, then empty.
-	if (Math.floor(Math.random() * 2) === 0) {
-		return (
-			(await fetchOnlineQuote()) ??
-			pickCustomQuote(customQuotes) ??
-			EMPTY_QUOTE
-		);
-	}
-
-	return (
-		pickCustomQuote(customQuotes) ??
-		(await fetchOnlineQuote()) ??
-		EMPTY_QUOTE
+const getQuote = async (sources: QuoteSources): Promise<Quote> => {
+	debugLog(
+		"quote",
+		`sources — online=${sources.useOnline ? "on" : "off"}, myQuotes=${
+			sources.useMyQuotes ? "on" : "off"
+		}(${sources.customQuotes.length}), vaultNotes=${
+			sources.useVaultNotes ? "on" : "off"
+		}(${sources.vaultQuotes.length})`
 	);
+
+	const pickers: Array<() => Promise<Quote | null>> = [];
+
+	if (sources.useOnline) {
+		pickers.push(fetchOnlineQuote);
+	}
+	if (sources.useMyQuotes && sources.customQuotes.length) {
+		pickers.push(() =>
+			Promise.resolve(pickCustomQuote(sources.customQuotes))
+		);
+	}
+	if (sources.useVaultNotes && sources.vaultQuotes.length) {
+		pickers.push(() => Promise.resolve(pickRandom(sources.vaultQuotes)));
+	}
+
+	for (const pick of shuffle(pickers)) {
+		const quote = await pick();
+		if (quote) {
+			return quote;
+		}
+	}
+
+	return EMPTY_QUOTE;
 };
 
 export default getQuote;

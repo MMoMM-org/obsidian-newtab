@@ -20,8 +20,10 @@ import {
 	BOOKMARK_SOURCE,
 	BackgroundTheme,
 	QUOTE_SOURCE,
+	VAULT_QUOTE_SELECTION,
 	TIME_FORMAT,
 } from "src/Types/Enums";
+import { FolderSuggest } from "src/Settings/FolderSuggest";
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
 import electron from "electron";
@@ -65,7 +67,14 @@ export interface NewTabPluginSettings {
 	bookmarkSource: BOOKMARK_SOURCE;
 	bookmarkGroup: string;
 	showQuote: boolean;
-	quoteSource: QUOTE_SOURCE;
+	quoteUseOnline: boolean;
+	quoteUseMyQuotes: boolean;
+	quoteUseVaultNotes: boolean;
+	quoteVaultSelectionMode: VAULT_QUOTE_SELECTION;
+	quoteVaultTag: string;
+	quoteVaultFolder: string;
+	quoteVaultContentProperty: string;
+	quoteVaultAuthorProperty: string;
 	customQuotes: CustomQuote[];
 	debugLogging: boolean;
 }
@@ -90,9 +99,36 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	bookmarkSource: BOOKMARK_SOURCE.ALL,
 	bookmarkGroup: "",
 	showQuote: true,
-	quoteSource: QUOTE_SOURCE.ONLINE,
+	quoteUseOnline: true,
+	quoteUseMyQuotes: false,
+	quoteUseVaultNotes: false,
+	quoteVaultSelectionMode: VAULT_QUOTE_SELECTION.TAG,
+	quoteVaultTag: "type/note/quote",
+	quoteVaultFolder: "",
+	quoteVaultContentProperty: "Quote",
+	quoteVaultAuthorProperty: "Author",
 	customQuotes: [],
 	debugLogging: false,
+};
+
+/**
+ * Migrate the legacy single-select `quoteSource` to the per-source toggles.
+ * Runs only for data.json saved before the toggles existed (identified by the
+ * toggle being absent while the old field is present); new installs are
+ * untouched. `data` is the raw persisted object, `settings` the merged result.
+ */
+export const migrateQuoteSources = (
+	settings: NewTabPluginSettings,
+	data: Record<string, unknown>
+): void => {
+	if (data.quoteUseOnline !== undefined || data.quoteSource === undefined) {
+		return;
+	}
+	const source = data.quoteSource;
+	settings.quoteUseOnline =
+		source === QUOTE_SOURCE.ONLINE || source === QUOTE_SOURCE.BOTH;
+	settings.quoteUseMyQuotes =
+		source === QUOTE_SOURCE.MY_QUOTES || source === QUOTE_SOURCE.BOTH;
 };
 
 export class NewTabPluginSettingTab extends PluginSettingTab {
@@ -645,45 +681,157 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		new Setting(containerEl)
-			.setName("Quote source")
-			.setDesc(
-				`Where should quotes be pulled from? You can use either built in quotes, your own quotes, or a combination of both.`
-			)
-			.addDropdown((component) => {
-				Object.values(QUOTE_SOURCE).forEach((source) => {
-					component.addOption(source, source);
-				});
+		// Quotes are drawn from the union of whichever sources are enabled below.
+		const persist = () => {
+			this.plugin.settingsObservable.setValue(this.plugin.settings);
+			void this.plugin.saveSettings();
+		};
 
-				component.setValue(this.plugin.settings.quoteSource);
-				component.onChange((value: QUOTE_SOURCE) => {
-					this.plugin.settings.quoteSource = value;
-					this.plugin.settingsObservable.setValue(
-						this.plugin.settings
-					);
-					this.plugin.saveSettings();
-					this.display();
+		new Setting(containerEl)
+			.setName("Online quotes")
+			.setDesc(
+				`Random quotes from ZenQuotes (requires an internet connection).`
+			)
+			.addToggle((component) => {
+				component.setValue(this.plugin.settings.quoteUseOnline);
+				component.onChange((value) => {
+					this.plugin.settings.quoteUseOnline = value;
+					persist();
 				});
 			});
 
 		new Setting(containerEl)
-			.setName("Custom quotes")
-			.setDesc(`${this.plugin.settings.customQuotes.length} quotes`)
+			.setName("My quotes")
+			.setDesc(
+				`Your own quotes, stored in the plugin settings (${this.plugin.settings.customQuotes.length} saved).`
+			)
+			.addToggle((component) => {
+				component.setValue(this.plugin.settings.quoteUseMyQuotes);
+				component.onChange((value) => {
+					this.plugin.settings.quoteUseMyQuotes = value;
+					persist();
+				});
+			})
 			.addButton((component) => {
 				component.setButtonText("Edit");
-
 				component.onClick(() => {
 					new CustomQuotesModel(
 						this.plugin,
 						(modifiedCustomQuotes: CustomQuote[]) => {
 							this.plugin.settings.customQuotes =
 								modifiedCustomQuotes;
-							this.plugin.saveSettings();
+							void this.plugin.saveSettings();
 							this.display();
 						}
 					).open();
 				});
 			});
+
+		new Setting(containerEl)
+			.setName("Vault notes")
+			.setDesc(
+				`Use quotes stored in your notes' frontmatter, selected by tag or folder.`
+			)
+			.addToggle((component) => {
+				component.setValue(this.plugin.settings.quoteUseVaultNotes);
+				component.onChange((value) => {
+					this.plugin.settings.quoteUseVaultNotes = value;
+					persist();
+					this.display();
+				});
+			});
+
+		if (this.plugin.settings.quoteUseVaultNotes) {
+			new Setting(containerEl)
+				.setName("Note selection")
+				.setDesc(`Find quote notes by tag or by folder.`)
+				.addDropdown((component) => {
+					component.addOption(VAULT_QUOTE_SELECTION.TAG, "Tag");
+					component.addOption(
+						VAULT_QUOTE_SELECTION.PATH,
+						"Folder (path)"
+					);
+					component.setValue(
+						this.plugin.settings.quoteVaultSelectionMode
+					);
+					component.onChange((value: VAULT_QUOTE_SELECTION) => {
+						this.plugin.settings.quoteVaultSelectionMode = value;
+						persist();
+						this.display();
+					});
+				});
+
+			if (
+				this.plugin.settings.quoteVaultSelectionMode ===
+				VAULT_QUOTE_SELECTION.TAG
+			) {
+				new Setting(containerEl)
+					.setName("Tag")
+					.setDesc(
+						`Notes carrying this tag (frontmatter or inline) are used as quotes.`
+					)
+					.addText((component) => {
+						component.setPlaceholder("type/note/quote");
+						component.setValue(this.plugin.settings.quoteVaultTag);
+						component.onChange((value) => {
+							this.plugin.settings.quoteVaultTag = value;
+							persist();
+						});
+					});
+			} else {
+				new Setting(containerEl)
+					.setName("Folder")
+					.setDesc(
+						`Notes in this folder and its subfolders are used as quotes.`
+					)
+					.addSearch((component) => {
+						new FolderSuggest(
+							this.app,
+							component.inputEl,
+							(path) => {
+								this.plugin.settings.quoteVaultFolder = path;
+								persist();
+							}
+						);
+						component.setPlaceholder("Quotes");
+						component.setValue(
+							this.plugin.settings.quoteVaultFolder
+						);
+						component.onChange((value) => {
+							this.plugin.settings.quoteVaultFolder = value;
+							persist();
+						});
+					});
+			}
+
+			new Setting(containerEl)
+				.setName("Quote property")
+				.setDesc(`Frontmatter property holding the quote text.`)
+				.addText((component) => {
+					component.setPlaceholder("Quote");
+					component.setValue(
+						this.plugin.settings.quoteVaultContentProperty
+					);
+					component.onChange((value) => {
+						this.plugin.settings.quoteVaultContentProperty = value;
+						persist();
+					});
+				});
+
+			new Setting(containerEl)
+				.setName("Author property")
+				.setDesc(`Frontmatter property holding the author.`)
+				.addText((component) => {
+					component.setPlaceholder("Author");
+					component.setValue(
+						this.plugin.settings.quoteVaultAuthorProperty
+					);
+					component.onChange((value) => {
+						this.plugin.settings.quoteVaultAuthorProperty = value;
+						persist();
+					});
+				});
+		}
 
 		/****************************************
 		 * Debug settings

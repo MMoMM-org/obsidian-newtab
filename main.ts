@@ -5,6 +5,7 @@ import {
 	NewTabPluginSettingTab,
 	NewTabPluginSettings,
 	DEFAULT_SETTINGS,
+	migrateQuoteSources,
 } from "src/Settings/Settings";
 import { setDebugLogging } from "React/Utils/debug";
 
@@ -104,8 +105,10 @@ export default class NewTabPlugin extends Plugin {
 	 * Load data from disk, stored in data.json in plugin folder
 	 */
 	async loadSettings() {
-		const data = (await this.loadData()) || {};
+		const data = ((await this.loadData()) ??
+			{}) as Record<string, unknown>;
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+		migrateQuoteSources(this.settings, data);
 	}
 
 	/**
