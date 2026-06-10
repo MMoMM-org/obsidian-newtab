@@ -4,7 +4,7 @@ import { TFile, getIcon } from "obsidian";
 import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
 import NewTabPlugin from "main";
-import getBackground from "React/Utils/getBackground";
+import getBackground, { UNSPLASH_SECRET_ID } from "React/Utils/getBackground";
 import getTimeOfDayGreeting from "React/Utils/getTimeOfDayGreeting";
 import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
@@ -45,19 +45,29 @@ const App = ({
 	const mainDivRef = useRef<HTMLDivElement>(null);
 
 	const obsidian = useObsidian();
-	const background = useMemo(
-		() =>
-			getBackground(
-				settings.backgroundTheme,
-				settings.customBackground,
-				settings.localBackgrounds
-			),
-		[
+	const [background, setBackground] = useState<string | null>(null);
+	useEffect(() => {
+		let cancelled = false;
+		// The Unsplash key lives in SecretStorage, not in the synced settings.
+		const accessKey =
+			obsidian?.secretStorage.getSecret(UNSPLASH_SECRET_ID) ?? null;
+		void getBackground(
 			settings.backgroundTheme,
 			settings.customBackground,
 			settings.localBackgrounds,
-		]
-	);
+			accessKey
+		).then((url) => {
+			if (!cancelled) {
+				setBackground(url);
+			}
+		});
+		return () => {
+			cancelled = true;
+		};
+		// Depend on the whole settings object so entering the key (which nudges
+		// the settings observable) re-resolves the background; the per-day cache
+		// keeps redundant runs from making extra API calls.
+	}, [obsidian, settings]);
 
 	const allVaultFiles = obsidian?.vault.getAllLoadedFiles();
 	const latestModifiedMarkdownFiles = useMemo(() => {
@@ -139,7 +149,9 @@ const App = ({
 			`}
 			// @ts-ignore
 			style={{
-				backgroundImage: `url("${background}")`,
+				backgroundImage: background
+					? `url("${background}")`
+					: undefined,
 			}}
 			onKeyDown={(e) => {
 				if (!e.ctrlKey && !e.altKey && /^[A-Za-z0-9]$/.test(e.key)) {

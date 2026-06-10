@@ -1,7 +1,14 @@
 import fs from "fs";
 import { getBookmarkGroups } from "React/Utils/getBookmarks";
+import { UNSPLASH_SECRET_ID } from "React/Utils/getBackground";
 import NewTabPlugin from "main";
-import { App, PluginSettingTab, Setting, arrayBufferToBase64 } from "obsidian";
+import {
+	App,
+	PluginSettingTab,
+	Setting,
+	SecretComponent,
+	arrayBufferToBase64,
+} from "obsidian";
 import ChooseSearchProvider from "src/ChooseSearchProvider/ChooseSearchProvider";
 import CustomQuotesModel from "src/CustomQuotesModel/CustomQuotesModel";
 import {
@@ -129,6 +136,36 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.display();
 				});
 			});
+
+		const themeUsesUnsplash = ![
+			BackgroundTheme.CUSTOM,
+			BackgroundTheme.LOCAL,
+			BackgroundTheme.TRANSPARENT,
+			BackgroundTheme.TRANSPARENT_WITH_SHADOWS,
+		].includes(this.plugin.settings.backgroundTheme);
+
+		if (themeUsesUnsplash) {
+			const unsplashKeySetting = new Setting(containerEl)
+				.setName("Unsplash access key")
+				.setDesc(
+					`Required for themed backgrounds. Create a free app at unsplash.com/oauth/applications, then paste its access key here. Stored securely outside your settings file.`
+				);
+			const secret = new SecretComponent(
+				this.app,
+				unsplashKeySetting.controlEl
+			);
+			const existingKey =
+				this.app.secretStorage.getSecret(UNSPLASH_SECRET_ID);
+			if (existingKey) {
+				secret.setValue(existingKey);
+			}
+			secret.onChange((value) => {
+				this.app.secretStorage.setSecret(UNSPLASH_SECRET_ID, value);
+				// Nudge the new-tab view to re-resolve the background now that
+				// the key changed (the key itself is not part of settings).
+				this.plugin.settingsObservable.setValue(this.plugin.settings);
+			});
+		}
 
 		if (this.plugin.settings.backgroundTheme === BackgroundTheme.CUSTOM) {
 			new Setting(containerEl)

@@ -1,6 +1,13 @@
+import { requestUrl } from "obsidian";
 import { BackgroundTheme } from "src/Types/Enums";
 import getEasterDate from "./getEasterDate";
 import { isWithinDaysBefore } from "./isWithinXDays";
+
+/**
+ * SecretStorage ID under which the user's Unsplash access key is stored. Only
+ * this ID lives in data.json — the key value itself stays in SecretStorage.
+ */
+export const UNSPLASH_SECRET_ID = "unsplash-access-key";
 
 enum MONTH {
 	JANUARY = 1,
@@ -142,35 +149,123 @@ const getSeasonalTag = (date: Date) => {
 	}
 };
 
+const UNSPLASH_CACHE_PREFIX = "newtab:unsplash:";
+
 /**
- * Gets the background URL based on the theme settings, either for a specific theme, based on the season, or a custom background
+ * Today as YYYY-MM-DD, used as the cache bucket so a themed background stays
+ * stable for the day (matching the old per-day `cachetag` behaviour) and we
+ * make at most one API call per tag per day — well under the 50/hour demo limit.
+ */
+const todayStamp = (): string => new Date().toISOString().slice(0, 10);
+
+const readCache = (key: string): string | null => {
+	try {
+		return window.localStorage.getItem(key);
+	} catch {
+		return null;
+	}
+};
+
+const writeCache = (key: string, value: string): void => {
+	try {
+		// Drop stale entries from previous days so the cache stays bounded.
+		const today = todayStamp();
+		for (let i = window.localStorage.length - 1; i >= 0; i--) {
+			const k = window.localStorage.key(i);
+			if (
+				k &&
+				k.startsWith(UNSPLASH_CACHE_PREFIX) &&
+				!k.endsWith(`:${today}`)
+			) {
+				window.localStorage.removeItem(k);
+			}
+		}
+		window.localStorage.setItem(key, value);
+	} catch {
+		// localStorage may be unavailable or full — caching is best-effort.
+	}
+};
+
+/**
+ * Resolve a themed background image URL via the official Unsplash API
+ * (source.unsplash.com was deprecated and now 503s). Results are cached per tag
+ * per day. Returns null when there is no cached image and no access key, or on
+ * any API/network failure, so the caller can fall back to no background.
+ */
+const fetchUnsplashBackground = async (
+	query: string,
+	accessKey: string | null
+): Promise<string | null> => {
+	const cacheKey = `${UNSPLASH_CACHE_PREFIX}${query}:${todayStamp()}`;
+
+	const cached = readCache(cacheKey);
+	if (cached) {
+		return cached;
+	}
+
+	if (!accessKey) {
+		return null;
+	}
+
+	try {
+		const res = await requestUrl({
+			url: `https://api.unsplash.com/photos/random?orientation=landscape&query=${encodeURIComponent(
+				query
+			)}`,
+			headers: { Authorization: `Client-ID ${accessKey}` },
+			throw: false,
+		});
+
+		if (res.status !== 200) {
+			return null;
+		}
+
+		const url = (res.json as { urls?: { regular?: string } })?.urls
+			?.regular;
+		if (!url) {
+			return null;
+		}
+
+		writeCache(cacheKey, url);
+		return url;
+	} catch {
+		return null;
+	}
+};
+
+/**
+ * Gets the background URL based on the theme settings: a themed/seasonal photo
+ * from Unsplash, a custom URL, a random local image, or none (transparent).
  * @param backgroundTheme
  * @param customBackground
+ * @param localBackgrounds
+ * @param unsplashAccessKey resolved from SecretStorage; null when not set
  */
-const getBackground = (
+const getBackground = async (
 	backgroundTheme: BackgroundTheme,
 	customBackground: string,
-	localBackgrounds: string[]
-) => {
+	localBackgrounds: string[],
+	unsplashAccessKey: string | null
+): Promise<string | null> => {
 	switch (backgroundTheme) {
 		case BackgroundTheme.SEASONS_AND_HOLIDAYS:
-			const seasonalTag = getSeasonalTag(new Date());
-			return `https://source.unsplash.com/random?${seasonalTag}&cachetag=${new Date()
-				.toDateString()
-				.replace(/ /g, "")}`;
+			return fetchUnsplashBackground(
+				getSeasonalTag(new Date()) ?? SEASONAL_THEME.SUMMER,
+				unsplashAccessKey
+			);
 		case BackgroundTheme.CUSTOM:
 			return customBackground;
 		case BackgroundTheme.LOCAL:
-			return localBackgrounds[
-				Math.floor(Math.random() * localBackgrounds.length)
-			];
+			return localBackgrounds.length
+				? localBackgrounds[
+						Math.floor(Math.random() * localBackgrounds.length)
+				  ]
+				: null;
 		case BackgroundTheme.TRANSPARENT_WITH_SHADOWS:
 		case BackgroundTheme.TRANSPARENT:
 			return null;
 		default:
-			return `https://source.unsplash.com/random?${backgroundTheme}&cachetag=${new Date()
-				.toDateString()
-				.replace(/ /g, "")}`;
+			return fetchUnsplashBackground(backgroundTheme, unsplashAccessKey);
 	}
 };
 
