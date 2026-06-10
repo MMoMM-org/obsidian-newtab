@@ -14,7 +14,7 @@ a quote, quick search, bookmarks, and recently edited files.
   a custom URL, or transparent modes.
 - **Clock** — 12- or 24-hour.
 - **Greeting** — customizable, time-of-day aware.
-- **Quote** — built-in source (Quotable) or your own custom quotes.
+- **Quote** — built-in online quotes (ZenQuotes) or your own custom quotes.
 - **Search** — a top-left search button and an inline search box, each wired to a
   search provider of your choice.
 - **Bookmarks** — from all groups or a specific group.
@@ -68,8 +68,8 @@ New Tab is local-first and makes only a few optional, toggleable network request
 This plugin is derived from
 [obsidian-beautitab](https://github.com/andrewmcgivery/obsidian-beautitab) by
 Andrew McGivery, used under the MIT License. Background images are served by
-[Unsplash](https://unsplash.com); built-in quotes come from the
-[Quotable](https://github.com/lukePeavey/quotable) API.
+[Unsplash](https://unsplash.com); built-in online quotes come from the
+[ZenQuotes](https://zenquotes.io) API.
 
 ## License
 
