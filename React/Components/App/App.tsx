@@ -55,31 +55,44 @@ const App = ({
 		const accessKey = secretId
 			? obsidian?.secretStorage.getSecret(secretId) ?? null
 			: null;
-		void getBackground(
-			settings.backgroundTheme,
-			settings.customBackground,
-			settings.customTopic,
-			settings.localBackgrounds,
-			accessKey
-		).then((url) => {
-			if (!cancelled) {
-				debugLog(
-					"background",
-					url
-						? "applying background image"
-						: "no background image resolved (url=null)",
-					url
-				);
-				setBackground(url);
-			}
-		});
+		// Debounce: typing a custom topic changes settings.customTopic on every
+		// keystroke, and each partial query is a distinct Unsplash request /
+		// cache entry. Coalesce rapid edits into one resolve after typing stops.
+		const timer = setTimeout(() => {
+			void getBackground(
+				settings.backgroundTheme,
+				settings.customBackground,
+				settings.customTopic,
+				settings.localBackgrounds,
+				accessKey
+			).then((url) => {
+				if (!cancelled) {
+					debugLog(
+						"background",
+						url
+							? "applying background image"
+							: "no background image resolved (url=null)",
+						url
+					);
+					setBackground(url);
+				}
+			});
+		}, 250);
 		return () => {
 			cancelled = true;
+			clearTimeout(timer);
 		};
-		// Depend on the whole settings object so entering the key (which nudges
-		// the settings observable) re-resolves the background; the per-day cache
-		// keeps redundant runs from making extra API calls.
-	}, [obsidian, settings]);
+		// Depend only on the fields that actually drive the background, so
+		// editing unrelated settings (e.g. the greeting text) doesn't re-resolve
+		// it. Entering the key changes unsplashKeySecretId, which is covered.
+	}, [
+		obsidian,
+		settings.backgroundTheme,
+		settings.customBackground,
+		settings.customTopic,
+		settings.localBackgrounds,
+		settings.unsplashKeySecretId,
+	]);
 
 	const allVaultFiles = obsidian?.vault.getAllLoadedFiles();
 	const latestModifiedMarkdownFiles = useMemo(() => {
