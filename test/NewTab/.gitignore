@@ -1,0 +1,19 @@
+# Obsidian workspace state — regenerated on open, not worth committing
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/appearance.json
+.obsidian/graph.json
+.obsidian/core-plugins.json
+.obsidian/hotkeys.json
+.obsidian/types.json
+.obsidian/cache
+.trash/
+
+# Plugin under development — symlinked or copied from build output
+.obsidian/plugins/*/data.json
+.obsidian/plugins/*/main.js
+.obsidian/plugins/*/styles.css
+
+# Keep hot-reload (committed tooling)
+!.obsidian/plugins/hot-reload/main.js
+!.obsidian/plugins/hot-reload/manifest.json

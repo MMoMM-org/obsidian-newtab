@@ -1,0 +1,58 @@
+{
+	"name": "obsidian-newtab",
+	"version": "0.0.0",
+	"description": "Creates a customizable new tab view with beautiful backgrounds, quotes, search, and more.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"typecheck": "tsc --noEmit -skipLibCheck",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"test:live": "vitest run --config vitest.live.config.ts",
+		"lint": "eslint main.ts src React Views && stylelint build/styles.css",
+		"lint:css": "stylelint build/styles.css",
+		"lint:fix": "eslint main.ts src React Views --fix && stylelint build/styles.css --fix",
+		"audit": "npm audit --audit-level=high --omit=dev"
+	},
+	"keywords": [],
+	"author": "Marcus Breiden",
+	"license": "MIT",
+	"browserslist": [
+		"chrome 114"
+	],
+	"dependencies": {
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1"
+	},
+	"devDependencies": {
+		"@eslint/js": "9.39.4",
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/exec": "^7.0.3",
+		"@semantic-release/git": "^10.0.1",
+		"@semantic-release/github": "^11.0.1",
+		"@types/node": "^22.0.0",
+		"@types/react": "^18.3.12",
+		"@types/react-dom": "^18.3.1",
+		"esbuild": "0.25.5",
+		"esbuild-sass-plugin": "3.3.1",
+		"eslint": "9.39.4",
+		"eslint-plugin-obsidianmd": "0.3.0",
+		"globals": "14.0.0",
+		"jiti": "2.6.1",
+		"jsdom": "^26.1.0",
+		"sass-embedded": "^1.71.1",
+		"semantic-release": "^24.2.3",
+		"stylelint": "^16.0.0",
+		"stylelint-no-unsupported-browser-features": "^8.0.0",
+		"tslib": "2.4.0",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "8.59.0",
+		"vitest": "^3.2.1"
+	},
+	"peerDependencies": {
+		"obsidian": ">=1.5.7"
+	}
+}

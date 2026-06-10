@@ -1,0 +1,57 @@
+# IDE
+.vscode
+*.code-workspace
+*.iml
+.idea
+
+# npm
+node_modules
+
+# Build output — uploaded to GitHub releases, not committed
+main.js
+styles.css
+build/
+# Exception: hot-reload plugin ships with the test vault
+!test/*/.obsidian/plugins/hot-reload/main.js
+
+# Plugin runtime files inside test vault — built artifacts and generated state, not sources
+test/*/.obsidian/plugins/*/main.js
+test/*/.obsidian/plugins/*/styles.css
+test/*/.obsidian/plugins/*/manifest.json
+test/*/.obsidian/plugins/*/data.json
+test/*/.obsidian/plugins/*/audit/
+test/*/.obsidian/plugins/*/assets/
+
+# Per-developer Obsidian workspace state inside test vaults
+test/*/.obsidian/workspace*
+
+# Test coverage
+coverage/
+
+# Sourcemaps
+*.map
+
+# Obsidian
+data.json
+
+# macOS
+.DS_Store
+
+# Workspace scratch / inter-project message channels — local-only, not committed
+temp/
+_inbox/
+_outbox/
+_archive/
+
+# MCP config (may contain API keys)
+.mcp.json
+
+# Claude Code — ignore everything except the committed settings stub
+.claude/*
+!.claude/settings.json
+
+# Docker-based dev environment (deployed by ~/Kouzou/scripts/) — anchored to repo root
+/claude-docker/
+/claude-docker-home/
+/begin-code.sh
+/generated-images/

@@ -1,0 +1,10 @@
+{
+	"id": "newtab",
+	"name": "New Tab",
+	"version": "0.0.0",
+	"minAppVersion": "1.5.7",
+	"description": "Creates a customizable new tab view with beautiful backgrounds, quotes, search, and more.",
+	"author": "Marcus Breiden",
+	"authorUrl": "https://github.com/MMoMM-org/obsidian-newtab",
+	"isDesktopOnly": false
+}

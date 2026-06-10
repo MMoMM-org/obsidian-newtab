@@ -1,0 +1,261 @@
+.workspace-tabs .workspace-leaf-content.newtab {
+	color: #dadada;
+	container-type: size;
+
+	.view-header {
+		background: transparent;
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 40px;
+		height: 40px;
+		justify-content: space-between;
+		align-items: center;
+
+		.view-header-nav-buttons {
+			display: none;
+		}
+
+		.view-header-title-container {
+			display: none;
+		}
+
+		.view-action {
+			--icon-color: currentColor;
+		}
+
+		div {
+			margin-left: auto;
+		}
+	}
+
+	.view-content {
+		background-color: transparent;
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.newtab-root {
+		height: 100%;
+		width: 100%;
+		text-shadow: rgba(0, 0, 0, 0.1) 0px 1px 5px;
+		background: var(--background);
+		background-position: center center;
+		background-repeat: no-repeat;
+		background-size: cover;
+
+		&.newtab-root--transparent {
+			background: transparent;
+
+			.newtab-wrapper {
+				background: transparent;
+
+				.newtab-top {
+					background: transparent;
+				}
+
+				.newtab-quote {
+					background: transparent;
+				}
+			}
+		}
+
+		&.newtab-root--transparentWithShadows {
+			background: transparent;
+		}
+
+		.newtab-wrapper {
+			height: 100%;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			background: radial-gradient(
+				circle,
+				rgba(0, 0, 0, 0.6) 0%,
+				rgba(0, 0, 0, 0.6) 20%,
+				rgba(0, 0, 0, 0) 100%
+			);
+
+			.newtab-top {
+				flex: 1;
+				background: linear-gradient(
+					to bottom,
+					rgba(0, 0, 0, 0.6),
+					rgba(0, 0, 0, 0)
+				);
+				width: 100%;
+				height: 60px;
+				padding: 10px;
+
+				.newtab-iconbutton {
+					opacity: 0.8;
+
+					&:hover {
+						opacity: 1;
+					}
+
+					svg {
+						width: 22px;
+						height: 22px;
+					}
+				}
+			}
+
+			.newtab-center {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+				padding-bottom: 20px;
+
+				.newtab-time {
+					font-size: 1050%;
+					line-height: 1;
+
+					@container (max-width: 520px) {
+						font-size: 30cqw;
+					}
+				}
+
+				.newtab-greeting {
+					font-size: 3rem;
+
+					@container (max-width: 520px) {
+						font-size: 8cqw;
+					}
+				}
+			}
+
+			.newtab-bottom {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				width: 100%;
+				align-items: center;
+
+				.newtab-search {
+					width: 50%;
+					min-width: 500px;
+
+					@container (max-width: 520px) {
+						width: 90%;
+						min-width: auto;
+					}
+
+					.newtab-search-wrapper {
+						height: 60px;
+						border-radius: 60px;
+						display: flex;
+						align-items: center;
+						width: 100%;
+						backdrop-filter: blur(5px);
+						background: rgba(255, 255, 255, 0.1);
+						box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+						margin-bottom: 20px;
+						text-decoration: none;
+						color: inherit;
+						line-height: 1;
+						padding-left: 20px;
+
+						.newtab-search-text {
+							font-size: 28px;
+							opacity: 0.8;
+							padding-left: 20px;
+						}
+
+						.newtab-icon svg {
+							height: 26px;
+							width: 26px;
+						}
+					}
+				}
+
+				.newtab-recentlyedited {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					overflow-y: auto;
+					width: 100%;
+
+					.newtab-recentlyedited-file {
+						color: inherit;
+						text-decoration: none;
+						text-align: center;
+						padding: 10px;
+						white-space: nowrap;
+						overflow: hidden;
+						width: 100px;
+
+						&:hover {
+							backdrop-filter: blur(5px);
+							background: rgba(255, 255, 255, 0.1);
+							box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+							border-radius: 10px;
+						}
+
+						.newtab-icon {
+							display: block;
+							svg {
+								width: 24px;
+								height: 24px;
+							}
+						}
+
+						.newtab-recentlyedited-file-name {
+							display: block;
+							font-size: 12px;
+							text-overflow: ellipsis;
+							overflow: hidden;
+						}
+					}
+				}
+			}
+
+			.newtab-quote {
+				width: 100%;
+				min-height: 60px;
+				padding-bottom: 10px;
+				background: linear-gradient(
+					to bottom,
+					rgba(0, 0, 0, 0) 0%,
+					rgba(0, 0, 0, 0.4) 60%,
+					rgba(0, 0, 0, 0.6) 100%
+				);
+				text-align: center;
+
+				@container (max-width: 599px) {
+					padding-bottom: 80px;
+				}
+
+				.newtab-quote-content {
+					font-size: 1.1rem;
+					font-weight: 500;
+					margin-bottom: 5px;
+
+					@container (max-width: 600px) {
+						font-size: 0.8rem;
+					}
+				}
+
+				.newtab-quote-author {
+					font-size: 0.9rem;
+					opacity: 0.7;
+				}
+			}
+		}
+	}
+
+	.newtab-iconbutton {
+		text-decoration: none;
+		color: inherit;
+
+		.newtab-iconbutton-text {
+			position: absolute;
+			left: -9999999px;
+		}
+	}
+}
