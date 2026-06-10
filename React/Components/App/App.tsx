@@ -8,7 +8,7 @@ import getBackground from "React/Utils/getBackground";
 import getTimeOfDayGreeting from "React/Utils/getTimeOfDayGreeting";
 import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
-import getQuote from "React/Utils/getQuote";
+import getQuote, { Quote } from "React/Utils/getQuote";
 import { BackgroundTheme } from "src/Types/Enums";
 
 /**
@@ -37,10 +37,7 @@ const App = ({
 	settingsObservable: Observable;
 	plugin: NewTabPlugin;
 }) => {
-	const [quote, setQuote] = useState<{
-		content: string;
-		author: string;
-	} | null>(null);
+	const [quote, setQuote] = useState<Quote | null>(null);
 	const [settings, setSettings] = useState<NewTabPluginSettings>(
 		settingsObservable.getValue()
 	);
@@ -267,6 +264,20 @@ const App = ({
 							{quote.author}
 						</div>
 					)}
+					{quote?.content &&
+						quote.fromZenQuotes &&
+						settings.showQuote && (
+							<div className="newtab-quote-attribution">
+								Quotes provided by{" "}
+								<a
+									href="https://zenquotes.io/"
+									target="_blank"
+									rel="noopener"
+								>
+									ZenQuotes API
+								</a>
+							</div>
+						)}
 				</div>
 			</div>
 		</div>

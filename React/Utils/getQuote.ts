@@ -5,6 +5,11 @@ import { CustomQuote } from "src/Types/Interfaces";
 export interface Quote {
 	content: string;
 	author: string;
+	/**
+	 * True when the quote was fetched from ZenQuotes. Their key-free tier
+	 * requires visible attribution, so the UI shows a link only in this case.
+	 */
+	fromZenQuotes?: boolean;
 }
 
 const EMPTY_QUOTE: Quote = { content: "", author: "" };
@@ -42,7 +47,7 @@ const fetchOnlineQuote = async (): Promise<Quote | null> => {
 			return null;
 		}
 
-		return { content: first.q, author: first.a };
+		return { content: first.q, author: first.a, fromZenQuotes: true };
 	} catch {
 		return null;
 	}
