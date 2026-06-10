@@ -16,4 +16,9 @@
 /.obsidian/plugins/*
 !/.obsidian/plugins/hot-reload/
 
+# Scratch notes created while QA-testing in the vault (Untitled, Bookmark, …) —
+# transient content, not part of the committed skeleton. Keep README.md.
+/*.md
+!/README.md
+
 .trash/
