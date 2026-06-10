@@ -166,9 +166,30 @@ const App = ({
 					: undefined,
 			}}
 			onKeyDown={(e) => {
-				if (!e.ctrlKey && !e.altKey && /^[A-Za-z0-9]$/.test(e.key)) {
+				if (e.ctrlKey || e.altKey || e.metaKey) {
+					return;
+				}
+				// An IME can't compose on this non-editable div, so the input
+				// method never activates here (#41). Open the switcher so
+				// composition can continue in its real input. The in-progress
+				// composition character can't be forwarded, so don't pass one.
+				if (
+					e.nativeEvent.isComposing ||
+					e.keyCode === 229 ||
+					e.key === "Process"
+				) {
 					plugin.openSwitcherCommand(
 						settings.inlineSearchProvider.command
+					);
+					return;
+				}
+				// Any single printable character opens the switcher and is
+				// forwarded, so the first keystroke isn't swallowed (#73).
+				if (e.key.length === 1) {
+					e.preventDefault();
+					plugin.openSwitcherCommand(
+						settings.inlineSearchProvider.command,
+						e.key
 					);
 				}
 			}}

@@ -126,24 +126,60 @@ export default class NewTabPlugin extends Plugin {
 	}
 
 	/**
-	 * Check if the choosen provider is enabled
-	 * If yes: open it by using executeCommandById
-	 * If no: Notice the user and tell them to enable it in the settings
+	 * Check if the chosen provider is enabled.
+	 * If yes: open it via executeCommandById.
+	 * If no: notice the user to enable it in the settings.
+	 *
+	 * When `initialKey` is given (the keystroke that triggered the inline
+	 * search), forward it into the switcher's input once that input appears, so
+	 * the first character isn't swallowed.
 	 */
-	openSwitcherCommand(command: string): void {
+	openSwitcherCommand(command: string, initialKey?: string): void {
 		const pluginID = command.split(":")[0];
 		//@ts-ignore
 		const plugins = this.app.plugins.plugins;
 		//@ts-ignore
 		const internalPlugins = this.app.internalPlugins.plugins;
 
-		if (plugins[pluginID] || internalPlugins[pluginID]?.enabled) {
-			//@ts-ignore
-			this.app.commands.executeCommandById(command);
-		} else {
+		if (!(plugins[pluginID] || internalPlugins[pluginID]?.enabled)) {
 			new Notice(
 				`Plugin ${pluginID} is not enabled. Please enable it in the settings.`
 			);
+			return;
 		}
+
+		//@ts-ignore
+		this.app.commands.executeCommandById(command);
+
+		if (!initialKey) {
+			return;
+		}
+
+		// The switcher opens its modal asynchronously and focuses its own input.
+		// Forward the triggering character into that input so it isn't lost.
+		// Poll across a few animation frames because each provider (core
+		// switcher, Omnisearch, …) opens on its own schedule; give up quietly
+		// if no input shows up.
+		let attempts = 0;
+		const forwardKey = () => {
+			const el = activeDocument.activeElement;
+			if (
+				el instanceof HTMLInputElement ||
+				el instanceof HTMLTextAreaElement
+			) {
+				el.value = initialKey;
+				el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+				try {
+					el.setSelectionRange(initialKey.length, initialKey.length);
+				} catch {
+					// Some input types don't support selection — ignore.
+				}
+				return;
+			}
+			if (attempts++ < 20) {
+				activeWindow.requestAnimationFrame(forwardKey);
+			}
+		};
+		activeWindow.requestAnimationFrame(forwardKey);
 	}
 }
