@@ -70,33 +70,44 @@ export default class NewTabPlugin extends Plugin {
 	 */
 	async versionCheck() {
 		const localVersion = process.env.PLUGIN_VERSION;
-		const stableVersion = await requestUrl(
-			"https://raw.githubusercontent.com/MMoMM-org/obsidian-newtab/main/package.json"
-		).then(async (res) => {
-			if (res.status === 200) {
-				const response = await res.json;
-				return response.version;
-			}
-		});
-		const betaVersion = await requestUrl(
-			"https://raw.githubusercontent.com/MMoMM-org/obsidian-newtab/beta/package.json"
-		).then(async (res) => {
-			if (res.status === 200) {
-				const response = await res.json;
-				return response.version;
-			}
-		});
 
-		if (localVersion?.indexOf("beta") !== -1) {
-			if (localVersion !== betaVersion) {
+		// Read a branch's published version without crashing on a missing or
+		// private repo. requestUrl rejects on any non-2xx response, so a 404
+		// (private repo with no auth, or a branch that doesn't exist) must be
+		// tolerated here — otherwise the rejection escapes onload as an
+		// uncaught promise error.
+		const fetchVersion = async (
+			branch: string
+		): Promise<string | undefined> => {
+			try {
+				const res = await requestUrl({
+					url: `https://raw.githubusercontent.com/MMoMM-org/obsidian-newtab/${branch}/package.json`,
+					throw: false,
+				});
+				if (res.status === 200) {
+					return res.json.version;
+				}
+			} catch {
+				// Offline or the request still threw — skip the update check.
+			}
+			return undefined;
+		};
+
+		const stableVersion = await fetchVersion("main");
+		const betaVersion = await fetchVersion("beta");
+
+		// Only notify when a newer remote version was actually retrieved; never
+		// nag when the check could not run (e.g. private repo or offline).
+		if (localVersion?.includes("beta")) {
+			if (betaVersion && localVersion !== betaVersion) {
 				new Notice(
-					"There is a beta update available for the NewTab plugin. Please update to to the latest version to get the latest features!",
+					"There is a beta update available for the NewTab plugin. Please update to the latest version to get the latest features!",
 					0
 				);
 			}
-		} else if (localVersion !== stableVersion) {
+		} else if (stableVersion && localVersion !== stableVersion) {
 			new Notice(
-				"There is an update available for the NewTab plugin. Please update to to the latest version to get the latest features!",
+				"There is an update available for the NewTab plugin. Please update to the latest version to get the latest features!",
 				0
 			);
 		}
