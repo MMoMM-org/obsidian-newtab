@@ -58,7 +58,7 @@ const App = ({
 		// Debounce: typing a custom topic changes settings.customTopic on every
 		// keystroke, and each partial query is a distinct Unsplash request /
 		// cache entry. Coalesce rapid edits into one resolve after typing stops.
-		const timer = setTimeout(() => {
+		const timer = window.setTimeout(() => {
 			void getBackground(
 				settings.backgroundTheme,
 				settings.customBackground,
@@ -80,7 +80,7 @@ const App = ({
 		}, 250);
 		return () => {
 			cancelled = true;
-			clearTimeout(timer);
+			window.clearTimeout(timer);
 		};
 		// Depend only on the fields that actually drive the background, so
 		// editing unrelated settings (e.g. the greeting text) doesn't re-resolve
@@ -117,12 +117,12 @@ const App = ({
 	 * Note that this shouldn't cause extra renders because calling "setTime" with a duplicate value should skip the render
 	 */
 	useEffect(() => {
-		const timer = setInterval(() => {
+		const timer = window.setInterval(() => {
 			setTime(getTime(settings.timeFormat));
 		}, 1000);
 
 		return () => {
-			clearInterval(timer);
+			window.clearInterval(timer);
 		};
 	}, [setTime, settings]);
 

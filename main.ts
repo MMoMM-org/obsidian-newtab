@@ -227,9 +227,9 @@ export default class NewTabPlugin extends Plugin {
 				return;
 			}
 			if (attempts++ < 20) {
-				activeWindow.requestAnimationFrame(forwardKey);
+				window.requestAnimationFrame(forwardKey);
 			}
 		};
-		activeWindow.requestAnimationFrame(forwardKey);
+		window.requestAnimationFrame(forwardKey);
 	}
 }
