@@ -173,7 +173,12 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				secret.setValue(existingKey);
 			}
 			secret.onChange((value) => {
-				this.app.secretStorage.setSecret(UNSPLASH_SECRET_ID, value);
+				// Trim so a stray newline/space from pasting the key can't cause
+				// a 401 "invalid access token" from Unsplash.
+				this.app.secretStorage.setSecret(
+					UNSPLASH_SECRET_ID,
+					value.trim()
+				);
 				// Nudge the new-tab view to re-resolve the background now that
 				// the key changed (the key itself is not part of settings).
 				this.plugin.settingsObservable.setValue(this.plugin.settings);

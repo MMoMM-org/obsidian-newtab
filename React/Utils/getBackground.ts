@@ -205,7 +205,10 @@ const fetchUnsplashBackground = async (
 		return cached;
 	}
 
-	if (!accessKey) {
+	// Trim so a stray newline/space from copy-pasting the key can't turn into
+	// a 401 "invalid access token".
+	const key = accessKey?.trim();
+	if (!key) {
 		debugLog(
 			"background",
 			`no Unsplash access key set — no image. Add one in Settings → Background (query was "${query}").`
@@ -218,10 +221,14 @@ const fetchUnsplashBackground = async (
 	)}`;
 
 	try {
-		debugLog("background", `requesting Unsplash for "${query}"`, endpoint);
+		debugLog(
+			"background",
+			`requesting Unsplash for "${query}" (keyLength=${key.length})`,
+			endpoint
+		);
 		const res = await requestUrl({
 			url: endpoint,
-			headers: { Authorization: `Client-ID ${accessKey}` },
+			headers: { Authorization: `Client-ID ${key}` },
 			throw: false,
 		});
 
