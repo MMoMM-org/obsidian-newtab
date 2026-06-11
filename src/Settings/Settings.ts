@@ -1,4 +1,3 @@
-import fs from "fs";
 import { getBookmarkGroups } from "React/Utils/getBookmarks";
 import { debugLog, setDebugLogging } from "React/Utils/debug";
 import {
@@ -10,7 +9,6 @@ import NewTabPlugin from "main";
 import {
 	App,
 	Notice,
-	Platform,
 	PluginSettingTab,
 	Setting,
 	SecretComponent,
@@ -28,20 +26,6 @@ import {
 import { FolderSuggest } from "src/Settings/FolderSuggest";
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
-import electron from "electron";
-
-/** Minimal typing for the Electron remote `showOpenDialog` surface we use. */
-interface ElectronRemote {
-	remote: {
-		dialog: {
-			showOpenDialog(options: {
-				properties: string[];
-				title: string;
-				filters: { name: string; extensions: string[] }[];
-			}): Promise<{ canceled: boolean; filePaths: string[] }>;
-		};
-	};
-}
 
 const DEFAULT_SEARCH_PROVIDER: SearchProvider = {
 	command: "switcher:open",
@@ -179,27 +163,35 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 	}
 
 	/**
-	 * Pick image files from outside the vault and copy them into the configured
-	 * background image folder, so they join the local-background rotation without
-	 * the plugin ever reading from outside the vault. Requires a folder to be
-	 * set; the folder is created if it doesn't exist yet.
+	 * Let the user pick image files from their device and copy them into the
+	 * configured background image folder, so they join the local-background
+	 * rotation. Uses a hidden file input (works on desktop and mobile, with no
+	 * Node/Electron dependency). Requires a folder to be set; it is created if
+	 * it doesn't exist yet.
 	 */
-	private async transferLocalImagesToVault(): Promise<void> {
+	private transferLocalImagesToVault(): void {
 		const folder = this.plugin.settings.localBackgroundFolder.trim();
 		if (!folder) {
 			new Notice("Set a background image folder first.");
 			return;
 		}
 
-		// Electron's `remote` module is desktop-only and untyped here; describe
-		// just the dialog surface we use. This control is hidden on mobile.
-		const dialog = (electron as unknown as ElectronRemote).remote.dialog;
-		const result = await dialog.showOpenDialog({
-			properties: ["openFile", "multiSelections"],
-			title: "Add background images",
-			filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png"] }],
+		const input = activeDocument.createElement("input");
+		input.type = "file";
+		input.accept = "image/*";
+		input.multiple = true;
+		input.addEventListener("change", () => {
+			void this.importPickedImages(Array.from(input.files ?? []), folder);
 		});
-		if (result.canceled) {
+		input.click();
+	}
+
+	/** Copy the picked browser File objects into `folder`, then refresh. */
+	private async importPickedImages(
+		files: File[],
+		folder: string
+	): Promise<void> {
+		if (files.length === 0) {
 			return;
 		}
 
@@ -209,14 +201,13 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		}
 
 		let copied = 0;
-		for (const filePath of result.filePaths) {
-			const fileData = fs.readFileSync(filePath);
-			const filename = filePath.split(/[\\/]/).pop() ?? "background.png";
-			const destPath = this.uniqueVaultPath(normalizedFolder, filename);
-			await this.app.vault.createBinary(
-				destPath,
-				new Uint8Array(fileData).buffer
+		for (const file of files) {
+			const data = await file.arrayBuffer();
+			const destPath = this.uniqueVaultPath(
+				normalizedFolder,
+				file.name || "background.png"
 			);
+			await this.app.vault.createBinary(destPath, data);
 			copied++;
 		}
 
@@ -267,7 +258,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Background theme")
 			.setDesc(
-				`What theme would you like to utilize for the random backgrounds? "Seasons and Holidays" will use a different tag depending on the time of the year. Custom will allow you to input your own url. Local will use the local images imported below.`
+				`What theme would you like to utilize for the random backgrounds? "seasons and holidays" will use a different tag depending on the time of the year. Custom will allow you to input your own URL. Local will use the local images imported below.`
 			)
 			.addDropdown((component) => {
 				Object.values(BackgroundTheme).forEach((theme) => {
@@ -351,8 +342,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 
 		if (this.plugin.settings.backgroundTheme === BackgroundTheme.CUSTOM) {
 			new Setting(containerEl)
-				.setName("Custom background url")
-				.setDesc(`What url should be used for the background image?`)
+				.setName("Custom background URL")
+				.setDesc(`What URL should be used for the background image?`)
 				.addText((component) => {
 					component.setValue(this.plugin.settings.customBackground);
 					component.onChange((value) => {
@@ -369,7 +360,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Background image folder")
 			.setDesc(
-				`When the background theme is "Local", a random image from this vault folder (and its subfolders) is shown. Manage the images by adding to or deleting from the folder in your vault.`
+				`When the background theme is "local", a random image from this vault folder (and its subfolders) is shown. Manage the images by adding to or deleting from the folder in your vault.`
 			)
 			.addSearch((component) => {
 				new FolderSuggest(this.app, component.inputEl, (path) => {
@@ -390,21 +381,17 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		// The picker is the only control here and is desktop-only (Electron), so
-		// hide the whole row on mobile, where files are managed via the vault.
-		if (!Platform.isMobile) {
-			new Setting(containerEl)
-				.setName("Transfer local image to vault")
-				.setDesc(
-					`Copy an image from your computer into the background image folder above so it joins the rotation. Files are copied in, so the plugin never reads outside your vault.`
-				)
-				.addButton((component) => {
-					component.setButtonText("Add local image");
-					component.onClick(() => {
-						void this.transferLocalImagesToVault();
-					});
+		new Setting(containerEl)
+			.setName("Transfer local image to vault")
+			.setDesc(
+				`Copy an image from your device into the background image folder above so it joins the rotation. Files are copied in, so the plugin never reads outside your vault.`
+			)
+			.addButton((component) => {
+				component.setButtonText("Add local image");
+				component.onClick(() => {
+					this.transferLocalImagesToVault();
 				});
-		}
+			});
 
 		/****************************************
 		 * Search settings
@@ -890,7 +877,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 						"Log background and quote provider activity (Unsplash, ZenQuotes) to the developer console. Leave off unless you're troubleshooting — see the "
 					);
 					frag.createEl("a", {
-						text: "troubleshooting guide",
+						text: "Troubleshooting guide",
 						href: "https://github.com/MMoMM-org/obsidian-newtab/blob/main/docs/troubleshooting.md",
 					});
 					frag.appendText(

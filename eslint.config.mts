@@ -50,7 +50,19 @@ export default tseslint.config(
 			"@typescript-eslint/restrict-template-expressions": "warn",
 			"no-case-declarations": "warn",
 			"import/no-nodejs-modules": "warn",
-			"obsidianmd/ui/sentence-case": "warn",
+			// Scope the rule (don't disable it): preserve product/proper-noun
+			// casing it would otherwise lowercase, and skip URL/tag-path literals.
+			// Acronyms (URL, OAuth, …) keep the plugin's defaults.
+			"obsidianmd/ui/sentence-case": [
+				"warn",
+				{
+					brands: ["Obsidian", "NewTab", "Unsplash", "ZenQuotes"],
+					ignoreRegex: [
+						"\\w+\\.(?:com|net|org|io)\\b",
+						"^[a-z][\\w-]*(?:/[\\w-]+)+$",
+					],
+				},
+			],
 			"obsidianmd/rule-custom-message": "warn",
 			"obsidianmd/prefer-window-timers": "warn",
 		},
