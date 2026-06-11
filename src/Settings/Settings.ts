@@ -9,10 +9,11 @@ import {
 import NewTabPlugin from "main";
 import {
 	App,
+	Notice,
 	PluginSettingTab,
 	Setting,
 	SecretComponent,
-	arrayBufferToBase64,
+	normalizePath,
 } from "obsidian";
 import ChooseSearchProvider from "src/ChooseSearchProvider/ChooseSearchProvider";
 import CustomQuotesModel from "src/CustomQuotesModel/CustomQuotesModel";
@@ -27,8 +28,6 @@ import { FolderSuggest } from "src/Settings/FolderSuggest";
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
 import electron from "electron";
-import ConfirmModal from "src/ConfirmModal/ConfirmModal";
-import ChooseImageSuggestModal from "src/ChooseImageSuggestModal/ChooseImageSuggestModal";
 
 const DEFAULT_SEARCH_PROVIDER: SearchProvider = {
 	command: "switcher:open",
@@ -52,7 +51,13 @@ export interface NewTabPluginSettings {
 	 * value itself stays in Obsidian's secret store. Empty when unset.
 	 */
 	unsplashKeySecretId: string;
-	localBackgrounds: string[];
+	/**
+	 * Vault folder holding the "Local" background images; every image inside it
+	 * (and its subfolders) is resolved to an app:// resource URL at render time
+	 * and shown at random. Stored as a path (not base64) to keep data.json small.
+	 * Empty means no local backgrounds are configured.
+	 */
+	localBackgroundFolder: string;
 	showTopLeftSearchButton: boolean;
 	topLeftSearchProvider: SearchProvider;
 	showTime: boolean;
@@ -84,7 +89,7 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	customBackground: "",
 	customTopic: "",
 	unsplashKeySecretId: "",
-	localBackgrounds: [],
+	localBackgroundFolder: "",
 	showTopLeftSearchButton: true,
 	topLeftSearchProvider: DEFAULT_SEARCH_PROVIDER,
 	showTime: true,
@@ -157,6 +162,72 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			cls: "newtab-search-provider-current-value",
 			text: display,
 		});
+	}
+
+	/**
+	 * Pick image files from outside the vault and copy them into the configured
+	 * background image folder, so they join the local-background rotation without
+	 * the plugin ever reading from outside the vault. Requires a folder to be
+	 * set; the folder is created if it doesn't exist yet.
+	 */
+	private async transferLocalImagesToVault(): Promise<void> {
+		const folder = this.plugin.settings.localBackgroundFolder.trim();
+		if (!folder) {
+			new Notice("Set a background image folder first.");
+			return;
+		}
+
+		// @ts-ignore — Electron's remote dialog is desktop-only; this control is
+		// hidden on mobile.
+		const result = await electron.remote.dialog.showOpenDialog({
+			properties: ["openFile", "multiSelections"],
+			title: "Add background images",
+			filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png"] }],
+		});
+		if (result.canceled) {
+			return;
+		}
+
+		const normalizedFolder = normalizePath(folder);
+		if (!this.app.vault.getAbstractFileByPath(normalizedFolder)) {
+			await this.app.vault.createFolder(normalizedFolder);
+		}
+
+		let copied = 0;
+		for (const filePath of result.filePaths as string[]) {
+			const fileData = fs.readFileSync(filePath);
+			const filename = filePath.split(/[\\/]/).pop() ?? "background.png";
+			const destPath = this.uniqueVaultPath(normalizedFolder, filename);
+			await this.app.vault.createBinary(
+				destPath,
+				new Uint8Array(fileData).buffer
+			);
+			copied++;
+		}
+
+		new Notice(
+			`Copied ${copied} image${copied === 1 ? "" : "s"} into "${folder}".`
+		);
+		// Folder contents changed; nudge any open new-tab view to re-resolve.
+		this.plugin.settingsObservable.setValue(this.plugin.settings);
+	}
+
+	/**
+	 * A vault path inside `folder` for `filename` that doesn't collide with an
+	 * existing file, appending " 1", " 2", … before the extension as needed.
+	 */
+	private uniqueVaultPath(folder: string, filename: string): string {
+		const dot = filename.lastIndexOf(".");
+		const base = dot === -1 ? filename : filename.slice(0, dot);
+		const ext = dot === -1 ? "" : filename.slice(dot);
+
+		let candidate = normalizePath(`${folder}/${filename}`);
+		let i = 1;
+		while (this.app.vault.getAbstractFileByPath(candidate)) {
+			candidate = normalizePath(`${folder}/${base} ${i}${ext}`);
+			i++;
+		}
+		return candidate;
 	}
 
 	display(): void {
@@ -271,96 +342,46 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 		}
 
-		const localBackgroundImagesSetting = new Setting(containerEl).setName(
-			"Local background images"
-		);
-
-		// @ts-ignore
-		if (!this.app.isMobile) {
-			localBackgroundImagesSetting.addButton((component) => {
-				component.setButtonText("Add local image");
-				component.onClick(() => {
-					// @ts-ignore
-					electron.remote.dialog
-						.showOpenDialog({
-							properties: ["openFile", "multiSelections"],
-							title: "Add background images",
-							filters: [
-								{ name: "Images", extensions: ["jpg", "png"] },
-							],
-						})
-						.then((result: any) => {
-							if (!result.canceled) {
-								result.filePaths.forEach((filePath: string) => {
-									const fileData = fs.readFileSync(filePath);
-									const base64Data =
-										fileData.toString("base64");
-
-									this.plugin.settings.localBackgrounds.push(
-										`data:image/png;base64,${base64Data}`
-									);
-								});
-
-								this.plugin.saveSettings();
-								this.display();
-							}
-						});
-				});
-			});
-		}
-
-		localBackgroundImagesSetting.addButton((component) => {
-			component.setButtonText("Add vault image");
-			component.onClick(() => {
-				new ChooseImageSuggestModal(this.app, async (result) => {
-					const fileData = await this.app.vault.readBinary(result);
-					const base64Data = arrayBufferToBase64(fileData);
-
-					this.plugin.settings.localBackgrounds.push(
-						`data:image/png;base64,${base64Data}`
+		new Setting(containerEl)
+			.setName("Background image folder")
+			.setDesc(
+				`When the background theme is "Local", a random image from this vault folder (and its subfolders) is shown. Manage the images by adding to or deleting from the folder in your vault.`
+			)
+			.addSearch((component) => {
+				new FolderSuggest(this.app, component.inputEl, (path) => {
+					this.plugin.settings.localBackgroundFolder = path;
+					this.plugin.settingsObservable.setValue(
+						this.plugin.settings
 					);
 					this.plugin.saveSettings();
-					this.display();
-				}).open();
+				});
+				component.setPlaceholder("Backgrounds");
+				component.setValue(this.plugin.settings.localBackgroundFolder);
+				component.onChange((value) => {
+					this.plugin.settings.localBackgroundFolder = value;
+					this.plugin.settingsObservable.setValue(
+						this.plugin.settings
+					);
+					this.plugin.saveSettings();
+				});
 			});
-		});
 
-		const localBackgroundsDiv = containerEl.createEl("div", {
-			cls: "newtabsettings-localbackgrounds",
-		});
-
-		this.plugin.settings.localBackgrounds.forEach(
-			(localBackground, index) => {
-				const backgroundDiv = localBackgroundsDiv.createEl("div", {
-					cls: "newtabsettings-localbackgrounds-background",
+		// The picker is the only control here and is desktop-only (Electron), so
+		// hide the whole row on mobile, where files are managed via the vault.
+		// @ts-ignore
+		if (!this.app.isMobile) {
+			new Setting(containerEl)
+				.setName("Transfer local image to vault")
+				.setDesc(
+					`Copy an image from your computer into the background image folder above so it joins the rotation. Files are copied in, so the plugin never reads outside your vault.`
+				)
+				.addButton((component) => {
+					component.setButtonText("Add local image");
+					component.onClick(() => {
+						void this.transferLocalImagesToVault();
+					});
 				});
-				backgroundDiv.createEl("img", {
-					attr: {
-						src: localBackground,
-					},
-				});
-				backgroundDiv.createEl("button", {
-					text: "x",
-					cls: "newtabsettings-localbackgrounds-background-delete",
-				});
-				backgroundDiv.addEventListener("click", () => {
-					new ConfirmModal(
-						this.app,
-						() => {
-							this.plugin.settings.localBackgrounds.splice(
-								index,
-								1
-							);
-							this.plugin.saveSettings();
-							this.display();
-						},
-						"Remove background",
-						`Are you sure?`,
-						"Remove"
-					).open();
-				});
-			}
-		);
+		}
 
 		/****************************************
 		 * Search settings

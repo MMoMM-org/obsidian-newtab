@@ -269,7 +269,8 @@ const fetchUnsplashBackground = async (
  * from Unsplash, a custom URL, a random local image, or none (transparent).
  * @param backgroundTheme
  * @param customBackground
- * @param localBackgrounds
+ * @param localBackgrounds resolved, ready-to-render image URLs (the caller turns
+ *   the stored vault paths into app:// resource URLs before passing them in)
  * @param unsplashAccessKey resolved from SecretStorage; null when not set
  */
 const getBackground = async (

@@ -5,6 +5,7 @@ import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
 import NewTabPlugin from "main";
 import getBackground from "React/Utils/getBackground";
+import { resolveLocalBackgroundUrls } from "React/Utils/resolveLocalBackgrounds";
 import getTimeOfDayGreeting from "React/Utils/getTimeOfDayGreeting";
 import { resolveGreetingLocale } from "React/Utils/greetings";
 import { getBookmarks } from "React/Utils/getBookmarks";
@@ -48,6 +49,18 @@ const App = ({
 	const mainDivRef = useRef<HTMLDivElement>(null);
 
 	const obsidian = useObsidian();
+
+	// Local backgrounds live in the configured vault folder; resolve them to
+	// app:// resource URLs the browser can render.
+	const localBackgroundUrls = useMemo(
+		() =>
+			resolveLocalBackgroundUrls(
+				obsidian,
+				settings.localBackgroundFolder
+			),
+		[obsidian, settings.localBackgroundFolder]
+	);
+
 	const [background, setBackground] = useState<string | null>(null);
 	useEffect(() => {
 		let cancelled = false;
@@ -65,7 +78,7 @@ const App = ({
 				settings.backgroundTheme,
 				settings.customBackground,
 				settings.customTopic,
-				settings.localBackgrounds,
+				localBackgroundUrls,
 				accessKey
 			).then((url) => {
 				if (!cancelled) {
@@ -92,7 +105,7 @@ const App = ({
 		settings.backgroundTheme,
 		settings.customBackground,
 		settings.customTopic,
-		settings.localBackgrounds,
+		localBackgroundUrls,
 		settings.unsplashKeySecretId,
 	]);
 

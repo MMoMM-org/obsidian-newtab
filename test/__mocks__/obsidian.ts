@@ -60,6 +60,7 @@ export class App {
 		getMarkdownFiles: vi.fn(() => [] as TFile[]),
 		getFiles: vi.fn(() => [] as TFile[]),
 		getAllLoadedFiles: vi.fn(() => [] as (TFile | TFolder)[]),
+		getResourcePath: vi.fn((file: TFile) => `app://vault/${file.path}`),
 		adapter: {
 			read: vi.fn(),
 			write: vi.fn(),
