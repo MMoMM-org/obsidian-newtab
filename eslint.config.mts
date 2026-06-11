@@ -26,35 +26,34 @@ export default tseslint.config(
 	// `recommendedTypeChecked` incrementally as the fork is refactored.
 	...tseslint.configs.recommended,
 	...obsidianmd.configs.recommended,
-	// ── Fork debt (obsidian-beautitab) ──────────────────────────────────────
-	// These type-aware rules fire on inherited beautitab source that wasn't
-	// written against them (unawaited settings re-renders, `any`-typed
-	// Observable, the deprecated `display()` API, enum comparisons). They are
-	// downgraded to warnings so CI stays green and the signal stays visible —
-	// pay them down incrementally and promote back to "error" as the fork is
-	// refactored. New code should not add to this list.
+	// ── Enforced standards ──────────────────────────────────────────────────
+	// The inherited beautitab debt (untyped Obsidian internals, `any` Observable,
+	// deprecated display(), enum comparisons, unawaited promises) has been paid
+	// down, so these rules are now errors — regressions fail CI. sentence-case is
+	// scoped (not disabled) so proper nouns/acronyms don't false-positive. New
+	// code is expected to keep this green.
 	{
 		rules: {
-			"@typescript-eslint/no-explicit-any": "warn",
-			"@typescript-eslint/no-floating-promises": "warn",
-			"@typescript-eslint/no-misused-promises": "warn",
-			"@typescript-eslint/no-deprecated": "warn",
-			"@typescript-eslint/no-unsafe-assignment": "warn",
-			"@typescript-eslint/no-unsafe-member-access": "warn",
-			"@typescript-eslint/no-unsafe-argument": "warn",
-			"@typescript-eslint/no-unsafe-call": "warn",
-			"@typescript-eslint/no-unsafe-return": "warn",
-			"@typescript-eslint/no-unsafe-function-type": "warn",
-			"@typescript-eslint/no-unsafe-enum-comparison": "warn",
-			"@typescript-eslint/no-duplicate-enum-values": "warn",
-			"@typescript-eslint/restrict-template-expressions": "warn",
-			"no-case-declarations": "warn",
-			"import/no-nodejs-modules": "warn",
+			"@typescript-eslint/no-explicit-any": "error",
+			"@typescript-eslint/no-floating-promises": "error",
+			"@typescript-eslint/no-misused-promises": "error",
+			"@typescript-eslint/no-deprecated": "error",
+			"@typescript-eslint/no-unsafe-assignment": "error",
+			"@typescript-eslint/no-unsafe-member-access": "error",
+			"@typescript-eslint/no-unsafe-argument": "error",
+			"@typescript-eslint/no-unsafe-call": "error",
+			"@typescript-eslint/no-unsafe-return": "error",
+			"@typescript-eslint/no-unsafe-function-type": "error",
+			"@typescript-eslint/no-unsafe-enum-comparison": "error",
+			"@typescript-eslint/no-duplicate-enum-values": "error",
+			"@typescript-eslint/restrict-template-expressions": "error",
+			"no-case-declarations": "error",
+			"import/no-nodejs-modules": "error",
 			// Scope the rule (don't disable it): preserve product/proper-noun
 			// casing it would otherwise lowercase, and skip URL/tag-path literals.
 			// Acronyms (URL, OAuth, …) keep the plugin's defaults.
 			"obsidianmd/ui/sentence-case": [
-				"warn",
+				"error",
 				{
 					brands: ["Obsidian", "NewTab", "Unsplash", "ZenQuotes"],
 					ignoreRegex: [
@@ -63,8 +62,8 @@ export default tseslint.config(
 					],
 				},
 			],
-			"obsidianmd/rule-custom-message": "warn",
-			"obsidianmd/prefer-window-timers": "warn",
+			"obsidianmd/rule-custom-message": "error",
+			"obsidianmd/prefer-window-timers": "error",
 		},
 	},
 	globalIgnores([
