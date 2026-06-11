@@ -6,5 +6,9 @@
 	"description": "Creates a customizable new tab view with beautiful backgrounds, quotes, search, and more.",
 	"author": "Marcus Breiden",
 	"authorUrl": "https://github.com/MMoMM-org/obsidian-newtab",
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://ko-fi.com/mmomm",
+		"GitHub Sponsor": "https://github.com/sponsors/MMoMM-org"
+	},
 	"isDesktopOnly": false
 }
