@@ -1,6 +1,28 @@
 @use "React/Components/App/App";
 @use "src/CustomQuotesModel/CustomQuotesModel";
 
+// Branded header at the top of the settings tab: name · version · author · docs.
+.newtab-settings-header {
+	margin-bottom: 1em;
+	padding-bottom: 0.75em;
+	border-bottom: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+
+	.newtab-settings-header-name {
+		font-weight: var(--font-semibold);
+		color: var(--text-normal);
+	}
+
+	.newtab-settings-header-sep {
+		opacity: 0.5;
+	}
+
+	a {
+		color: var(--text-accent);
+	}
+}
+
 // Search-provider settings: the selected provider sits on its own line under
 // the description (in the info block), so the long description can run almost
 // to the Change button without truncating the value.

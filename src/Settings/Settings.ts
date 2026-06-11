@@ -26,6 +26,11 @@ import {
 import { FolderSuggest } from "src/Settings/FolderSuggest";
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
+import { createElement } from "react";
+import { Root, createRoot } from "react-dom/client";
+import SettingsHeader from "React/Components/SettingsHeader/SettingsHeader";
+
+const NEWTAB_DOCS_URL = "https://github.com/MMoMM-org/obsidian-newtab#readme";
 
 const DEFAULT_SEARCH_PROVIDER: SearchProvider = {
 	command: "switcher:open",
@@ -136,10 +141,47 @@ export const migrateQuoteSources = (
 
 export class NewTabPluginSettingTab extends PluginSettingTab {
 	plugin: NewTabPlugin;
+	/** React root for the branded header rendered at the top of the tab. */
+	private headerRoot: Root | null = null;
 
 	constructor(app: App, plugin: NewTabPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+	}
+
+	/**
+	 * Mount the React settings header (name · version · author · docs) into a
+	 * container at the top of the tab. Re-mounts on each render() since
+	 * containerEl is emptied; unmounted on hide().
+	 */
+	private renderHeader(containerEl: HTMLElement): void {
+		const headerEl = containerEl.createDiv();
+		try {
+			this.headerRoot?.unmount();
+		} catch {
+			// Already torn down / mid-render — safe to ignore.
+		}
+		const manifest = this.plugin.manifest;
+		this.headerRoot = createRoot(headerEl);
+		this.headerRoot.render(
+			createElement(SettingsHeader, {
+				name: manifest.name,
+				version: manifest.version,
+				author: manifest.author,
+				authorUrl: manifest.authorUrl,
+				documentationUrl: NEWTAB_DOCS_URL,
+			})
+		);
+	}
+
+	hide(): void {
+		try {
+			this.headerRoot?.unmount();
+		} catch {
+			// Already torn down — safe to ignore.
+		}
+		this.headerRoot = null;
+		super.hide();
 	}
 
 	/**
@@ -249,6 +291,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty();
+
+		this.renderHeader(containerEl);
 
 		/****************************************
 		 * Background settings
