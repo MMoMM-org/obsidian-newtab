@@ -55,8 +55,8 @@ This mirrors the build into the vault's plugin folder with a dev-stamped version
 so Obsidian reloads the bundle on every build. The canonical `manifest.json` is
 never modified.
 
-For how this repo was scaffolded, the deliberate decisions, inherited fork-debt,
-and known issues, see [docs/scaffolding-and-findings.md](docs/scaffolding-and-findings.md).
+For user-facing guides — installation, configuration, usage, and known issues —
+see the [docs/](docs/) directory.
 
 ### Adding a greeting language
 
@@ -79,6 +79,15 @@ This plugin is derived from
 Andrew McGivery, used under the MIT License. Background images are served by
 [Unsplash](https://unsplash.com); built-in online quotes come from the
 [ZenQuotes](https://zenquotes.io) API.
+
+<!-- doc-product:documentation:start -->
+## Documentation
+
+- [Installation](docs/installation.md)
+- [Configuration](docs/configuration.md) — Generated from `src/Settings/Settings.ts`.
+- [Usage](docs/usage.md)
+- [Troubleshooting](docs/troubleshooting.md)
+<!-- doc-product:documentation:end -->
 
 ## License
 
