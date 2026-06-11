@@ -4,46 +4,51 @@ import getEasterDate from "./getEasterDate";
 import { isWithinDaysBefore } from "./isWithinXDays";
 import { debugLog } from "./debug";
 
-enum MONTH {
-	JANUARY = 1,
-	FEBUARY = 2,
-	MARCH = 3,
-	APRIL = 4,
-	MAY = 5,
-	JUNE = 6,
-	JULY = 7,
-	AUGUST = 8,
-	SEPTEMBER = 9,
-	OCTOBER = 10,
-	NOVEMBER = 11,
-	DECEMBER = 12,
-}
+// Plain numeric constants (not an enum) so the `switch (month)` below compares
+// number to number — an enum predicate vs a number triggers no-unsafe-enum-comparison.
+const MONTH = {
+	JANUARY: 1,
+	FEBUARY: 2,
+	MARCH: 3,
+	APRIL: 4,
+	MAY: 5,
+	JUNE: 6,
+	JULY: 7,
+	AUGUST: 8,
+	SEPTEMBER: 9,
+	OCTOBER: 10,
+	NOVEMBER: 11,
+	DECEMBER: 12,
+} as const;
 
-enum SEASONAL_THEME {
-	WINTER = "winter",
-	NEW_YEARS = "fireworks",
-	GROUNDHOG_DAY = "groundhog",
-	VALENTINES_DAY = "valentine",
-	WOMENS_DAY = "womensday",
-	ST_PATRICS_DAY = "pub",
-	PI_DAY = "pie",
-	EASTER = "easter",
-	APRIL_FOOLS = "laughing",
-	SPRING = "spring",
-	EARTH_DAY = "earth",
-	STARWARS = "yoda",
-	CINCO_DE_MAYO = "mexico",
-	SUMMER = "summer",
-	FLAG_DAY = "america,flag",
-	JUNETEENTH = "juneteenth",
-	INDIGENOUS_PEOPLES_DAY = "firstnations",
-	CANADA_DAY = "fireworks",
-	JULY_FIRST = "fireworks",
-	FALL = "fall",
-	HALLOWEEN = "helloween",
-	REMEMBERANCE_DAY = "veteran",
-	CHRISTMAS = "christmas",
-}
+// A plain const map rather than an enum: several holidays intentionally share
+// the same Unsplash query (e.g. New Year / Canada Day / July 4th → "fireworks"),
+// which `enum` forbids (no-duplicate-enum-values).
+const SEASONAL_THEME = {
+	WINTER: "winter",
+	NEW_YEARS: "fireworks",
+	GROUNDHOG_DAY: "groundhog",
+	VALENTINES_DAY: "valentine",
+	WOMENS_DAY: "womensday",
+	ST_PATRICS_DAY: "pub",
+	PI_DAY: "pie",
+	EASTER: "easter",
+	APRIL_FOOLS: "laughing",
+	SPRING: "spring",
+	EARTH_DAY: "earth",
+	STARWARS: "yoda",
+	CINCO_DE_MAYO: "mexico",
+	SUMMER: "summer",
+	FLAG_DAY: "america,flag",
+	JUNETEENTH: "juneteenth",
+	INDIGENOUS_PEOPLES_DAY: "firstnations",
+	CANADA_DAY: "fireworks",
+	JULY_FIRST: "fireworks",
+	FALL: "fall",
+	HALLOWEEN: "helloween",
+	REMEMBERANCE_DAY: "veteran",
+	CHRISTMAS: "christmas",
+} as const;
 
 /**
  * Given a date, returns a seasonal tag for use in background generation

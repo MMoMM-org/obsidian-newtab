@@ -4,6 +4,7 @@ import {
 	SEARCH_PROVIDER,
 } from "src/Settings/Settings";
 import { SearchProvider } from "src/Types/Interfaces";
+import { appInternals } from "src/Types/ObsidianInternals";
 
 /**
  * This class is used to create a modal to choose a search provider from a list of available search providers
@@ -26,15 +27,16 @@ class ChooseSearchProvider extends FuzzySuggestModal<SearchProvider> {
 	}
 
 	getItems(): SearchProvider[] {
-		//@ts-ignore
-		const allCommands = Object.entries(this.app.commands.commands).filter(
-			(pluginId) => SEARCH_PROVIDER.includes(pluginId[0].split(":")[0])
+		const allCommands = Object.entries(
+			appInternals(this.app).commands.commands
+		).filter((pluginId) =>
+			SEARCH_PROVIDER.includes(pluginId[0].split(":")[0])
 		);
 		const searchProviders: SearchProvider[] = [];
 		allCommands.forEach((command) => {
 			searchProviders.push({
 				command: command[0],
-				display: (command[1] as any).name,
+				display: command[1].name,
 			});
 		});
 		return searchProviders;

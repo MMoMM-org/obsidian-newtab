@@ -3,6 +3,7 @@ import { Root, createRoot } from "react-dom/client";
 import ReactApp from "../React/Components/App/App";
 import { ObsidianContext } from "../React/Context/ObsidianAppContext";
 import Observable from "src/Utils/Observable";
+import { NewTabPluginSettings } from "src/Settings/Settings";
 import NewTabPlugin from "main";
 
 export const NEWTAB_REACT_VIEW = "newtab-react-view";
@@ -10,12 +11,12 @@ export const NEWTAB_REACT_VIEW = "newtab-react-view";
 export class ReactView extends FileView {
 	root: Root | null = null;
 	app: App;
-	settingsObservable: Observable;
+	settingsObservable: Observable<NewTabPluginSettings>;
 	plugin: NewTabPlugin;
 
 	constructor(
 		app: App,
-		settingsObservable: Observable,
+		settingsObservable: Observable<NewTabPluginSettings>,
 		leaf: WorkspaceLeaf,
 		plugin: NewTabPlugin
 	) {

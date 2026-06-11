@@ -10,6 +10,7 @@ import NewTabPlugin from "main";
 import {
 	App,
 	Notice,
+	Platform,
 	PluginSettingTab,
 	Setting,
 	SecretComponent,
@@ -28,6 +29,19 @@ import { FolderSuggest } from "src/Settings/FolderSuggest";
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
 import electron from "electron";
+
+/** Minimal typing for the Electron remote `showOpenDialog` surface we use. */
+interface ElectronRemote {
+	remote: {
+		dialog: {
+			showOpenDialog(options: {
+				properties: string[];
+				title: string;
+				filters: { name: string; extensions: string[] }[];
+			}): Promise<{ canceled: boolean; filePaths: string[] }>;
+		};
+	};
+}
 
 const DEFAULT_SEARCH_PROVIDER: SearchProvider = {
 	command: "switcher:open",
@@ -177,9 +191,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			return;
 		}
 
-		// @ts-ignore — Electron's remote dialog is desktop-only; this control is
-		// hidden on mobile.
-		const result = await electron.remote.dialog.showOpenDialog({
+		// Electron's `remote` module is desktop-only and untyped here; describe
+		// just the dialog surface we use. This control is hidden on mobile.
+		const dialog = (electron as unknown as ElectronRemote).remote.dialog;
+		const result = await dialog.showOpenDialog({
 			properties: ["openFile", "multiSelections"],
 			title: "Add background images",
 			filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png"] }],
@@ -194,7 +209,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		}
 
 		let copied = 0;
-		for (const filePath of result.filePaths as string[]) {
+		for (const filePath of result.filePaths) {
 			const fileData = fs.readFileSync(filePath);
 			const filename = filePath.split(/[\\/]/).pop() ?? "background.png";
 			const destPath = this.uniqueVaultPath(normalizedFolder, filename);
@@ -231,6 +246,15 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		this.render();
+	}
+
+	/**
+	 * Build the settings UI. Split out from the (deprecated) `display()` so our
+	 * own in-tab re-renders call `render()` directly instead of the deprecated
+	 * API; `display()` stays as the thin override Obsidian invokes.
+	 */
+	private render(): void {
 		const { containerEl } = this;
 
 		containerEl.empty();
@@ -257,8 +281,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -297,7 +321,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			secret.setValue(this.plugin.settings.unsplashKeySecretId);
 			secret.onChange((id) => {
 				this.plugin.settings.unsplashKeySecretId = id ?? "";
-				this.plugin.saveSettings();
+				void this.plugin.saveSettings();
 				// Nudge the new-tab view to re-resolve the background now that
 				// the configured secret changed.
 				this.plugin.settingsObservable.setValue(this.plugin.settings);
@@ -320,7 +344,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 						this.plugin.settingsObservable.setValue(
 							this.plugin.settings
 						);
-						this.plugin.saveSettings();
+						void this.plugin.saveSettings();
 					});
 				});
 		}
@@ -336,8 +360,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 						this.plugin.settingsObservable.setValue(
 							this.plugin.settings
 						);
-						this.plugin.saveSettings();
-						this.display();
+						void this.plugin.saveSettings();
+						this.render();
 					});
 				});
 		}
@@ -353,7 +377,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 				component.setPlaceholder("Backgrounds");
 				component.setValue(this.plugin.settings.localBackgroundFolder);
@@ -362,14 +386,13 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 			});
 
 		// The picker is the only control here and is desktop-only (Electron), so
 		// hide the whole row on mobile, where files are managed via the vault.
-		// @ts-ignore
-		if (!this.app.isMobile) {
+		if (!Platform.isMobile) {
 			new Setting(containerEl)
 				.setName("Transfer local image to vault")
 				.setDesc(
@@ -402,8 +425,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -425,8 +448,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 							this.plugin.settingsObservable.setValue(
 								this.plugin.settings
 							);
-							this.plugin.saveSettings();
-							this.display();
+							void this.plugin.saveSettings();
+							this.render();
 						}
 					).open();
 				});
@@ -448,8 +471,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -471,8 +494,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 							this.plugin.settingsObservable.setValue(
 								this.plugin.settings
 							);
-							this.plugin.saveSettings();
-							this.display();
+							void this.plugin.saveSettings();
+							this.render();
 						}
 					).open();
 				});
@@ -499,8 +522,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -524,8 +547,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -546,8 +569,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -563,7 +586,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 			});
 
@@ -588,7 +611,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 			});
 
@@ -609,8 +632,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -631,8 +654,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -654,8 +677,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -674,8 +697,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 						this.plugin.settingsObservable.setValue(
 							this.plugin.settings
 						);
-						this.plugin.saveSettings();
-						this.display();
+						void this.plugin.saveSettings();
+						this.render();
 					});
 				});
 		}
@@ -697,8 +720,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					this.plugin.settingsObservable.setValue(
 						this.plugin.settings
 					);
-					this.plugin.saveSettings();
-					this.display();
+					void this.plugin.saveSettings();
+					this.render();
 				});
 			});
 
@@ -742,7 +765,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 							this.plugin.settings.customQuotes =
 								modifiedCustomQuotes;
 							void this.plugin.saveSettings();
-							this.display();
+							this.render();
 						}
 					).open();
 				});
@@ -758,7 +781,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				component.onChange((value) => {
 					this.plugin.settings.quoteUseVaultNotes = value;
 					persist();
-					this.display();
+					this.render();
 				});
 			});
 
@@ -778,7 +801,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					component.onChange((value: VAULT_QUOTE_SELECTION) => {
 						this.plugin.settings.quoteVaultSelectionMode = value;
 						persist();
-						this.display();
+						this.render();
 					});
 				});
 
@@ -880,7 +903,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				component.onChange((value) => {
 					this.plugin.settings.debugLogging = value;
 					setDebugLogging(value);
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 					// Immediate console feedback so it's obvious the toggle did
 					// something even before a new tab is opened.
 					if (value) {

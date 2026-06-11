@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useObsidian } from "../../Context/ObsidianAppContext";
-import { TFile, getIcon } from "obsidian";
+import { TFile, setIcon } from "obsidian";
 import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
 import NewTabPlugin from "main";
@@ -16,29 +16,27 @@ import { BackgroundTheme } from "src/Types/Enums";
 import { debugLog } from "React/Utils/debug";
 
 /**
- * Given an icon name, converts a Obsidian icon to a usable SVG string and embeds it into a span.
- * @returns
+ * Renders an Obsidian icon by name. Uses setIcon() to inject the SVG via
+ * Obsidian's own DOM helper rather than dangerouslySetInnerHTML, avoiding the
+ * XSS surface of injecting raw HTML.
  */
 const Icon = ({ name }: { name: string }) => {
-	const iconText = new XMLSerializer().serializeToString(
-		getIcon(name) || new Node()
-	);
+	const ref = useRef<HTMLSpanElement>(null);
 
-	return (
-		<span
-			className="newtab-icon"
-			dangerouslySetInnerHTML={{
-				__html: iconText,
-			}}
-		></span>
-	);
+	useEffect(() => {
+		if (ref.current) {
+			setIcon(ref.current, name);
+		}
+	}, [name]);
+
+	return <span className="newtab-icon" ref={ref}></span>;
 };
 
 const App = ({
 	settingsObservable,
 	plugin,
 }: {
-	settingsObservable: Observable;
+	settingsObservable: Observable<NewTabPluginSettings>;
 	plugin: NewTabPlugin;
 }) => {
 	const [quote, setQuote] = useState<Quote | null>(null);
@@ -222,7 +220,6 @@ const App = ({
 				"newtab-root--transparentWithShadows"
 			}
 			`}
-			// @ts-ignore
 			style={{
 				backgroundImage: background
 					? `url("${background}")`
@@ -236,11 +233,9 @@ const App = ({
 				// method never activates here (#41). Open the switcher so
 				// composition can continue in its real input. The in-progress
 				// composition character can't be forwarded, so don't pass one.
-				if (
-					e.nativeEvent.isComposing ||
-					e.keyCode === 229 ||
-					e.key === "Process"
-				) {
+				// `isComposing` / key "Process" both flag an IME keystroke (the
+				// modern replacement for the deprecated keyCode === 229 check).
+				if (e.nativeEvent.isComposing || e.key === "Process") {
 					plugin.openSwitcherCommand(
 						settings.inlineSearchProvider.command
 					);
@@ -326,7 +321,7 @@ const App = ({
 												const leaf =
 													obsidian?.workspace.getMostRecentLeaf();
 												if (file instanceof TFile) {
-													leaf?.openFile(file);
+													void leaf?.openFile(file);
 												}
 											}}
 										>
@@ -353,7 +348,7 @@ const App = ({
 												const leaf =
 													obsidian?.workspace.getMostRecentLeaf();
 												if (file instanceof TFile) {
-													leaf?.openFile(file);
+													void leaf?.openFile(file);
 												}
 											}}
 										>

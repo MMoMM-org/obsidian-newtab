@@ -4,18 +4,21 @@ import ConfirmModal from "src/ConfirmModal/ConfirmModal";
 import { CustomQuote } from "src/Types/Interfaces";
 
 class CustomQuotesModel extends Modal {
-	_onSave: Function;
+	_onSave: (customQuotes: CustomQuote[]) => void;
 	_plugin: NewTabPlugin;
 	_customQuotes: CustomQuote[];
 
-	constructor(plugin: NewTabPlugin, onSave: Function) {
+	constructor(
+		plugin: NewTabPlugin,
+		onSave: (customQuotes: CustomQuote[]) => void
+	) {
 		super(plugin.app);
 		this._plugin = plugin;
 		this._onSave = onSave;
 		// Ugly way to deep clone the array and its objects
 		this._customQuotes = JSON.parse(
 			JSON.stringify(this._plugin.settings.customQuotes)
-		);
+		) as CustomQuote[];
 	}
 
 	onOpen() {
@@ -67,8 +70,10 @@ class CustomQuotesModel extends Modal {
 			const quoteTextInput = textCell.createEl("textarea", {
 				text: customQuote.text,
 			});
-			quoteTextInput.addEventListener("change", (e: any) => {
-				this._customQuotes[index].text = e.target?.value;
+			quoteTextInput.addEventListener("change", (e) => {
+				this._customQuotes[index].text = (
+					e.target as HTMLTextAreaElement
+				).value;
 			});
 
 			const authorCell = tableRow.createEl("td");
@@ -76,8 +81,10 @@ class CustomQuotesModel extends Modal {
 				type: "text",
 				value: customQuote.author,
 			});
-			quoteAuthorInput.addEventListener("change", (e: any) => {
-				this._customQuotes[index].author = e.target?.value;
+			quoteAuthorInput.addEventListener("change", (e) => {
+				this._customQuotes[index].author = (
+					e.target as HTMLInputElement
+				).value;
 			});
 		});
 

@@ -1,6 +1,14 @@
-import { Notice, Plugin, TFile, WorkspaceLeaf, requestUrl } from "obsidian";
+import {
+	Notice,
+	Platform,
+	Plugin,
+	TFile,
+	WorkspaceLeaf,
+	requestUrl,
+} from "obsidian";
 import { ReactView, NEWTAB_REACT_VIEW } from "./Views/ReactView";
 import Observable from "src/Utils/Observable";
+import { appInternals } from "src/Types/ObsidianInternals";
 import {
 	NewTabPluginSettingTab,
 	NewTabPluginSettings,
@@ -11,7 +19,7 @@ import { setDebugLogging } from "React/Utils/debug";
 
 export default class NewTabPlugin extends Plugin {
 	settings: NewTabPluginSettings;
-	settingsObservable: Observable;
+	settingsObservable: Observable<NewTabPluginSettings>;
 	/** Path of a just-created note, awaiting its file-open to confirm intent. */
 	private pendingNewFilePath: string | null = null;
 	/** NewTab leaf active when a note was created — the one to replace. */
@@ -23,7 +31,7 @@ export default class NewTabPlugin extends Plugin {
 		// Apply the persisted debug-logging preference before anything logs.
 		setDebugLogging(this.settings.debugLogging);
 
-		this.versionCheck();
+		void this.versionCheck();
 
 		this.settingsObservable = new Observable(this.settings);
 
@@ -36,10 +44,7 @@ export default class NewTabPlugin extends Plugin {
 		this.addSettingTab(new NewTabPluginSettingTab(this.app, this));
 
 		this.registerEvent(
-			this.app.workspace.on(
-				"layout-change",
-				this.onLayoutChange.bind(this)
-			)
+			this.app.workspace.on("layout-change", () => this.onLayoutChange())
 		);
 
 		// Make "Create new note" (command or Cmd/Ctrl+N) replace the NewTab it's
@@ -85,16 +90,13 @@ export default class NewTabPlugin extends Plugin {
 		);
 
 		if (process.env.NODE_ENV === "development") {
-			// @ts-ignore
-			if (process.env.EMULATE_MOBILE && !this.app.isMobile) {
-				// @ts-ignore
-				this.app.emulateMobile(true);
+			const internals = appInternals(this.app);
+			if (process.env.EMULATE_MOBILE && !Platform.isMobile) {
+				internals.emulateMobile(true);
 			}
 
-			// @ts-ignore
-			if (!process.env.EMULATE_MOBILE && this.app.isMobile) {
-				// @ts-ignore
-				this.app.emulateMobile(false);
+			if (!process.env.EMULATE_MOBILE && Platform.isMobile) {
+				internals.emulateMobile(false);
 			}
 		}
 	}
@@ -138,7 +140,7 @@ export default class NewTabPlugin extends Plugin {
 					throw: false,
 				});
 				if (res.status === 200) {
-					return res.json.version;
+					return (res.json as { version?: string }).version;
 				}
 			} catch {
 				// Offline or the request still threw — skip the update check.
@@ -172,7 +174,7 @@ export default class NewTabPlugin extends Plugin {
 	private onLayoutChange(): void {
 		const leaf = this.app.workspace.getMostRecentLeaf();
 		if (leaf?.getViewState().type === "empty") {
-			leaf.setViewState({
+			void leaf.setViewState({
 				type: NEWTAB_REACT_VIEW,
 			});
 		}
@@ -189,10 +191,9 @@ export default class NewTabPlugin extends Plugin {
 	 */
 	openSwitcherCommand(command: string, initialKey?: string): void {
 		const pluginID = command.split(":")[0];
-		//@ts-ignore
-		const plugins = this.app.plugins.plugins;
-		//@ts-ignore
-		const internalPlugins = this.app.internalPlugins.plugins;
+		const internals = appInternals(this.app);
+		const plugins = internals.plugins.plugins;
+		const internalPlugins = internals.internalPlugins.plugins;
 
 		if (!(plugins[pluginID] || internalPlugins[pluginID]?.enabled)) {
 			new Notice(
@@ -201,8 +202,7 @@ export default class NewTabPlugin extends Plugin {
 			return;
 		}
 
-		//@ts-ignore
-		this.app.commands.executeCommandById(command);
+		internals.commands.executeCommandById(command);
 
 		if (!initialKey) {
 			return;
