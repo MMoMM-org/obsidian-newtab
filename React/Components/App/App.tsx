@@ -357,7 +357,27 @@ const App = ({
 				<div className="newtab-quote">
 					{quote?.content && settings.showQuote && (
 						<div className="newtab-quote-content">
-							&quot;{quote.content}&quot;
+							{quote.sourcePath ? (
+								<a
+									className="newtab-quote-link"
+									data-path={quote.sourcePath}
+									aria-label={quote.sourcePath}
+									onClick={() => {
+										const file = obsidian?.vault.getFileByPath(
+											quote.sourcePath ?? ""
+										);
+										if (file) {
+											void obsidian?.workspace
+												.getMostRecentLeaf()
+												?.openFile(file);
+										}
+									}}
+								>
+									&quot;{quote.content}&quot;
+								</a>
+							) : (
+								<>&quot;{quote.content}&quot;</>
+							)}
 						</div>
 					)}
 					{quote?.content && settings.showQuote && (

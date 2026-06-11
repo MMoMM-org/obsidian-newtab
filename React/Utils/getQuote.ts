@@ -10,6 +10,11 @@ export interface Quote {
 	 * requires visible attribution, so the UI shows a link only in this case.
 	 */
 	fromZenQuotes?: boolean;
+	/**
+	 * Vault path of the note this quote came from, when sourced from vault
+	 * notes. The UI links the quote to the note so it can be opened.
+	 */
+	sourcePath?: string;
 }
 
 const EMPTY_QUOTE: Quote = { content: "", author: "" };

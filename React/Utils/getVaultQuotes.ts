@@ -79,6 +79,7 @@ export const getVaultQuotes = (
 		quotes.push({
 			content: content.trim(),
 			author: typeof author === "string" ? author.trim() : "",
+			sourcePath: file.path,
 		});
 	}
 
