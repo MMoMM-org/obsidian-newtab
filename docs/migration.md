@@ -4,6 +4,10 @@ NewTab is derived from [BeautiTab](https://github.com/andrewmcgivery/obsidian-be
 so it can import your existing BeautiTab configuration in one click instead of
 making you reconfigure everything by hand.
 
+This includes [Mara-Li's maintained fork](https://github.com/Mara-Li/obsidian-beautitab)
+of BeautiTab — and if you run that fork, an Unsplash access key it has stored is
+migrated too, moved into Obsidian's secure secret store (never your settings file).
+
 <p align="center">
   <img src="../assets/import-dialog.png" alt="The one-time BeautiTab import dialog, with a folder picker for local background images and Import / Cancel buttons" />
 </p>
