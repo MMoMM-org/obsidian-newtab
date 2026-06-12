@@ -3,9 +3,21 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
 	resolve: {
-		alias: {
-			obsidian: path.resolve(__dirname, "test/__mocks__/obsidian.ts"),
-		},
+		// Mirror tsconfig's baseUrl="." so production code's bare `src/…`
+		// imports resolve under vitest, and stub `obsidian` with the mock.
+		alias: [
+			{
+				find: "obsidian",
+				replacement: path.resolve(
+					__dirname,
+					"test/__mocks__/obsidian.ts"
+				),
+			},
+			{
+				find: /^src\//,
+				replacement: path.resolve(__dirname, "src") + "/",
+			},
+		],
 	},
 	test: {
 		globals: true,

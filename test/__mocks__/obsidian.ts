@@ -57,6 +57,7 @@ export class App {
 		readBinary: vi.fn(),
 		createBinary: vi.fn(),
 		modifyBinary: vi.fn(),
+		createFolder: vi.fn(),
 		getMarkdownFiles: vi.fn(() => [] as TFile[]),
 		getFiles: vi.fn(() => [] as TFile[]),
 		getAllLoadedFiles: vi.fn(() => [] as (TFile | TFolder)[]),
@@ -84,6 +85,11 @@ export class App {
 	metadataCache = {
 		getFileCache: vi.fn((_file: TFile): CachedMetadata | null => null),
 		on: vi.fn(),
+	};
+	secretStorage = {
+		getSecret: vi.fn((_id: string): string | null => null),
+		setSecret: vi.fn(),
+		removeSecret: vi.fn(),
 	};
 }
 
