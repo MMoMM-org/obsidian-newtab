@@ -4,7 +4,7 @@ import { TFile, setIcon } from "obsidian";
 import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
 import NewTabPlugin from "main";
-import getBackground from "React/Utils/getBackground";
+import getBackground, { hourStamp } from "React/Utils/getBackground";
 import { resolveLocalBackgroundUrls } from "React/Utils/resolveLocalBackgrounds";
 import getTimeOfDayGreeting from "React/Utils/getTimeOfDayGreeting";
 import { resolveGreetingLocale } from "React/Utils/greetings";
@@ -60,6 +60,10 @@ const App = ({
 	);
 
 	const [background, setBackground] = useState<string | null>(null);
+	// Bucket the current hour so an open tab re-resolves its background when the
+	// hour rolls over (the cache key in getBackground is hour-scoped). Updated by
+	// the clock interval below; only a changed value re-renders / re-resolves.
+	const [hourBucket, setHourBucket] = useState(hourStamp());
 	useEffect(() => {
 		let cancelled = false;
 		// The Unsplash key lives in SecretStorage under the user-chosen ID; only
@@ -105,6 +109,8 @@ const App = ({
 		settings.customTopic,
 		localBackgroundUrls,
 		settings.unsplashKeySecretId,
+		// Re-resolve when the hour changes so the image refreshes on the hour.
+		hourBucket,
 	]);
 
 	// "Recent files" must reflect what the user actually opened most recently,
@@ -135,6 +141,10 @@ const App = ({
 	useEffect(() => {
 		const timer = window.setInterval(() => {
 			setTime(getTime(settings.timeFormat));
+			// Cheap hour-boundary check: setHourBucket with an unchanged value
+			// skips the render, so this only triggers a background re-resolve
+			// once per hour.
+			setHourBucket(hourStamp());
 		}, 1000);
 
 		return () => {
