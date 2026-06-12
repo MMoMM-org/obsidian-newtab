@@ -43,8 +43,7 @@ set the quote source to **My quotes**.
 
 ## "Update available" notice
 
-On load the plugin checks GitHub for a newer version. On a private repository
-the check is skipped silently and never blocks anything.
+On load the plugin checks GitHub for a newer version.
 
 ## Known issue: disabling the plugin while a New Tab is the active tab
 
