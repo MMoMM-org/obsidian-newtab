@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-newtab",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Creates a customizable new tab view with beautiful backgrounds, quotes, search, and more.",
 	"main": "main.js",
 	"type": "module",

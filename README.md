@@ -34,6 +34,14 @@ Install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin, then ad
 2. Copy them into `<vault>/.obsidian/plugins/newtab/`.
 3. Reload Obsidian and enable **New Tab** in *Settings → Community plugins*.
 
+## Migrating from BeautiTab
+
+NewTab is derived from BeautiTab, so it can bring your existing BeautiTab
+configuration across in one click. When BeautiTab is set up in your vault, NewTab
+offers a **one-time, opt-in, non-destructive** import on first run — and leaves an
+**Import from BeautiTab** button in the settings tab if you dismiss it. See
+[docs/migration.md](docs/migration.md) for what carries over and what doesn't.
+
 ## Development
 
 ```bash

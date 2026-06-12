@@ -24,8 +24,11 @@ import {
 	TIME_FORMAT,
 } from "src/Types/Enums";
 import { FolderSuggest } from "src/Settings/FolderSuggest";
+import { BeautitabImportModal } from "src/Import/BeautitabImportModal";
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
+import { themeUsesUnsplash } from "src/Utils/themeUsesUnsplash";
+import { uniqueVaultPath } from "src/Utils/uniqueVaultPath";
 import { createElement } from "react";
 import { Root, createRoot } from "react-dom/client";
 import SettingsHeader from "React/Components/SettingsHeader/SettingsHeader";
@@ -85,6 +88,18 @@ export interface NewTabPluginSettings {
 	quoteVaultAuthorProperty: string;
 	customQuotes: CustomQuote[];
 	debugLogging: boolean;
+	/**
+	 * Whether the one-time BeautiTab import has been *offered* (the auto-popup
+	 * shown). Set once, regardless of whether the user accepted or dismissed, so
+	 * the popup never auto-fires twice. The settings-tab fallback button stays
+	 * available until the import actually runs (see beautitabImportCompleted).
+	 */
+	beautitabImportOffered: boolean;
+	/**
+	 * Whether a BeautiTab import has actually run. Drives the settings-tab
+	 * fallback button's visibility and permanently retires the prompt.
+	 */
+	beautitabImportCompleted: boolean;
 }
 
 export const DEFAULT_SETTINGS: NewTabPluginSettings = {
@@ -117,6 +132,8 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	quoteVaultAuthorProperty: "Author",
 	customQuotes: [],
 	debugLogging: false,
+	beautitabImportOffered: false,
+	beautitabImportCompleted: false,
 };
 
 /**
@@ -265,17 +282,38 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 	 * existing file, appending " 1", " 2", … before the extension as needed.
 	 */
 	private uniqueVaultPath(folder: string, filename: string): string {
-		const dot = filename.lastIndexOf(".");
-		const base = dot === -1 ? filename : filename.slice(0, dot);
-		const ext = dot === -1 ? "" : filename.slice(dot);
+		return uniqueVaultPath(this.app, folder, filename);
+	}
 
-		let candidate = normalizePath(`${folder}/${filename}`);
-		let i = 1;
-		while (this.app.vault.getAbstractFileByPath(candidate)) {
-			candidate = normalizePath(`${folder}/${base} ${i}${ext}`);
-			i++;
+	/**
+	 * When BeautiTab is present in this vault and its settings haven't been
+	 * imported yet, offer a fallback "Import from BeautiTab" button. This covers
+	 * the user who dismissed the one-time first-run popup. Presence is detected
+	 * once at load and cached on `plugin.beautitabDetected`, so this stays a
+	 * synchronous render with no async-append race.
+	 */
+	private renderBeautitabImport(containerEl: HTMLElement): void {
+		if (
+			!this.plugin.beautitabDetected ||
+			this.plugin.settings.beautitabImportCompleted
+		) {
+			return;
 		}
-		return candidate;
+
+		new Setting(containerEl).setHeading().setName("Import from BeautiTab");
+		new Setting(containerEl)
+			.setName("Import BeautiTab settings")
+			.setDesc(
+				"BeautiTab is set up in this vault. Copy its configuration into NewTab — non-destructive, runs once."
+			)
+			.addButton((button) => {
+				button.setButtonText("Import from BeautiTab").setCta();
+				button.onClick(() => {
+					new BeautitabImportModal(this.plugin, () =>
+						this.render()
+					).open();
+				});
+			});
 	}
 
 	display(): void {
@@ -293,6 +331,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		this.renderHeader(containerEl);
+
+		this.renderBeautitabImport(containerEl);
 
 		/****************************************
 		 * Background settings
@@ -321,14 +361,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		const themeUsesUnsplash = ![
-			BackgroundTheme.CUSTOM,
-			BackgroundTheme.LOCAL,
-			BackgroundTheme.TRANSPARENT,
-			BackgroundTheme.TRANSPARENT_WITH_SHADOWS,
-		].includes(this.plugin.settings.backgroundTheme);
-
-		if (themeUsesUnsplash) {
+		if (themeUsesUnsplash(this.plugin.settings.backgroundTheme)) {
 			const unsplashKeySetting = new Setting(containerEl)
 				.setName("Unsplash access key")
 				.setDesc(
