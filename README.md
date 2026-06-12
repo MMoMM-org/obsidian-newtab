@@ -15,7 +15,9 @@ a quote, quick search, bookmarks, and recently edited files.
 - **Backgrounds** — seasonal/holiday themes via Unsplash, your own local images,
   a custom URL, or transparent modes.
 - **Clock** — 12- or 24-hour.
-- **Greeting** — customizable, time-of-day aware.
+- **Greeting** — customizable and time-of-day aware, in 10 languages out of the
+  box: English, Deutsch, Español, Français, Português, Italiano, Nederlands,
+  Русский, 中文 (简体), and 日本語.
 - **Quote** — built-in online quotes (ZenQuotes) or your own custom quotes.
 - **Search** — a top-left search button and an inline search box, each wired to a
   search provider of your choice.
@@ -25,16 +27,15 @@ a quote, quick search, bookmarks, and recently edited files.
 
 ## Install
 
-### BRAT (recommended while unreleased)
+New Tab is available in Obsidian's community plugin directory:
 
-Install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin, then add
-`MMoMM-org/obsidian-newtab` as a beta plugin.
+1. Open **Settings → Community plugins** (turn off **Restricted mode** if it's on).
+2. Click **Browse**, search for **New Tab**, and choose the entry by **Marcus Breiden**.
+3. Click **Install**, then **Enable**.
 
-### Manual
-
-1. Download `main.js`, `manifest.json`, and `styles.css` from a release.
-2. Copy them into `<vault>/.obsidian/plugins/newtab/`.
-3. Reload Obsidian and enable **New Tab** in *Settings → Community plugins*.
+Then open a new tab (**Ctrl/Cmd + T**) — the empty tab becomes the New Tab view.
+For pre-release (BRAT) installs, verifying, and updating, see
+[docs/installation.md](docs/installation.md).
 
 ## Migrating from BeautiTab
 
@@ -43,6 +44,18 @@ configuration across in one click. When BeautiTab is set up in your vault, NewTa
 offers a **one-time, opt-in, non-destructive** import on first run — and leaves an
 **Import from BeautiTab** button in the settings tab if you dismiss it. See
 [docs/migration.md](docs/migration.md) for what carries over and what doesn't.
+
+
+<!-- doc-product:documentation:start -->
+## Documentation
+
+- [Installation](docs/installation.md)
+- [Configuration](docs/configuration.md) — Generated from `src/Settings/Settings.ts`.
+- [Usage](docs/usage.md)
+- [Troubleshooting](docs/troubleshooting.md)
+<!-- doc-product:documentation:end -->
+
+
 
 ## Development
 
@@ -90,14 +103,11 @@ Andrew McGivery, used under the MIT License. Background images are served by
 [Unsplash](https://unsplash.com); built-in online quotes come from the
 [ZenQuotes](https://zenquotes.io) API.
 
-<!-- doc-product:documentation:start -->
-## Documentation
+Special thanks to **[Mara-Li](https://github.com/Mara-Li)**, whose maintained fork
+[Mara-Li/obsidian-beautitab](https://github.com/Mara-Li/obsidian-beautitab) fixed
+many of the issues in the original plugin — it's the version I ran until building
+New Tab, and several of her fixes informed this one.
 
-- [Installation](docs/installation.md)
-- [Configuration](docs/configuration.md) — Generated from `src/Settings/Settings.ts`.
-- [Usage](docs/usage.md)
-- [Troubleshooting](docs/troubleshooting.md)
-<!-- doc-product:documentation:end -->
 
 ## License
 
