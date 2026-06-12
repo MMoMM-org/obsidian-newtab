@@ -16,10 +16,17 @@ import {
 	migrateQuoteSources,
 } from "src/Settings/Settings";
 import { setDebugLogging } from "React/Utils/debug";
+import { readBeautitabData } from "src/Import/Beautitab";
+import { BeautitabImportModal } from "src/Import/BeautitabImportModal";
 
 export default class NewTabPlugin extends Plugin {
 	settings: NewTabPluginSettings;
 	settingsObservable: Observable<NewTabPluginSettings>;
+	/**
+	 * Whether a BeautiTab `data.json` was found in this vault at load. Cached so
+	 * the settings tab can render the fallback import button synchronously.
+	 */
+	beautitabDetected = false;
 	/** Path of a just-created note, awaiting its file-open to confirm intent. */
 	private pendingNewFilePath: string | null = null;
 	/** NewTab leaf active when a note was created — the one to replace. */
@@ -42,6 +49,12 @@ export default class NewTabPlugin extends Plugin {
 		);
 
 		this.addSettingTab(new NewTabPluginSettingTab(this.app, this));
+
+		// Detect BeautiTab and, on first run, offer a one-time import. Deferred
+		// to layout-ready so the modal doesn't open before the workspace exists.
+		this.app.workspace.onLayoutReady(() => {
+			void this.maybeOfferBeautitabImport();
+		});
 
 		this.registerEvent(
 			this.app.workspace.on("layout-change", () => this.onLayoutChange())
@@ -118,6 +131,27 @@ export default class NewTabPlugin extends Plugin {
 	 */
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	/**
+	 * Detect BeautiTab in this vault and, on first run only, offer a one-time
+	 * import. `beautitabImportOffered` gates the auto-popup (set once it's shown,
+	 * whether the user imports or dismisses); the settings-tab fallback button
+	 * stays available until the import actually runs
+	 * (`beautitabImportCompleted`). `beautitabDetected` is cached for that button.
+	 */
+	private async maybeOfferBeautitabImport() {
+		this.beautitabDetected = (await readBeautitabData(this.app)) !== null;
+		if (
+			!this.beautitabDetected ||
+			this.settings.beautitabImportCompleted ||
+			this.settings.beautitabImportOffered
+		) {
+			return;
+		}
+		this.settings.beautitabImportOffered = true;
+		await this.saveSettings();
+		new BeautitabImportModal(this).open();
 	}
 
 	/**
