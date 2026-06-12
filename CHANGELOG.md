@@ -1,3 +1,11 @@
+# [0.3.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.2.1...0.3.0) (2026-06-12)
+
+
+### Features
+
+* change background on the hour, not the day ([#18](https://github.com/MMoMM-org/obsidian-newtab/issues/18)) ([04a29fc](https://github.com/MMoMM-org/obsidian-newtab/commit/04a29fc86b6112feec32b8ab50d8a6c438aa0cf3))
+* localize new-tab title via Obsidian's i18n ([#18](https://github.com/MMoMM-org/obsidian-newtab/issues/18)) ([8a60d89](https://github.com/MMoMM-org/obsidian-newtab/commit/8a60d8972e43a5f582410e106965af8c9672c77e))
+
 ## [0.2.1](https://github.com/MMoMM-org/obsidian-newtab/compare/0.2.0...0.2.1) (2026-06-12)
 
 
