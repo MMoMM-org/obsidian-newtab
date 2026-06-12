@@ -113,7 +113,6 @@ const context = await esbuild.context({
 	plugins: [sassPlugin(), copyAssets],
 	define: {
 		"process.env.NODE_ENV": prod ? '"production"' : '"development"',
-		"process.env.PLUGIN_VERSION": `"${manifest.version}"`,
 		"process.env.EMULATE_MOBILE": prod
 			? "false"
 			: process.argv.includes("--mobile").toString(),
