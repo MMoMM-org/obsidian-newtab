@@ -4,7 +4,9 @@ Get from an installed plugin to a working new tab, then the workflows you'll rep
 
 ## First use
 
-![The New Tab dashboard: a full-screen background, a clock, a greeting, a search box, recent files and bookmarks, and a quote](../assets/new-tab-dashboard.png)
+<p align="center">
+  <img src="../assets/new-tab-dashboard.png" alt="The New Tab dashboard: a full-screen background, a clock, a greeting, a search box, recent files and bookmarks, and a quote" />
+</p>
 
 Open a new tab (**Ctrl/Cmd + T**, or click the **+** in the tab bar). The empty
 tab is replaced by the New Tab view. With the default settings it shows:

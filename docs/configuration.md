@@ -1,8 +1,5 @@
 # Configuration
 
-> Generated from `src/Settings/Settings.ts`. Re-run `/doc-product extract` after
-> changing settings to keep this page in sync.
-
 All settings for New Tab live in one place and apply immediately as you change
 them.
 
@@ -19,6 +16,10 @@ related option is selected (noted in the description).
 
 ### Background
 
+<p align="center">
+  <img src="../assets/settings-background.png" alt="The NewTab settings tab, showing the background settings and the plugin header" />
+</p>
+
 | Setting | Default | Description |
 |---|---|---|
 | Background theme | `Seasons and holidays` | Theme for the random background. "Seasons and holidays" varies by time of year; "Custom" lets you supply a URL; "Local" uses imported images; "Transparent" shows your Obsidian theme. |
@@ -31,11 +32,15 @@ related option is selected (noted in the description).
 > image from your device into the background folder so it joins the rotation —
 > it is an action, not a stored setting.
 
-![The NewTab settings tab, showing the background settings and the plugin header](../assets/settings-background.png)
-
-![The background theme dropdown listing every available theme](../assets/settings-background-themes.png)
+<p align="center">
+  <img src="../assets/settings-background-themes.png" alt="The background theme dropdown listing every available theme" />
+</p>
 
 ### Search
+
+<p align="center">
+  <img src="../assets/settings-search-time.png" alt="The search and time settings" />
+</p>
 
 | Setting | Default | Description |
 |---|---|---|
@@ -51,9 +56,13 @@ related option is selected (noted in the description).
 | Show time | `true` | Show the clock in the middle of the new tab. |
 | Time format | `12-hour` | Display the time in 12-hour or 24-hour format. |
 
-![The search and time settings](../assets/settings-search-time.png)
+
 
 ### Greeting
+
+<p align="center">
+  <img src="../assets/settings-greeting-recent.png" alt="The greeting and recent-files settings" />
+</p>
 
 | Setting | Default | Description |
 |---|---|---|
@@ -67,7 +76,6 @@ related option is selected (noted in the description).
 |---|---|---|
 | Show recent files | `true` | Show recently opened files in the middle of the new tab. |
 
-![The greeting and recent-files settings](../assets/settings-greeting-recent.png)
 
 ### Bookmarks
 
@@ -78,6 +86,10 @@ related option is selected (noted in the description).
 | Bookmarks group | `""` | Which bookmark group to pull from. Shown only when the source is "Bookmarks from group". |
 
 ### Quote
+
+<p align="center">
+  <img src="../assets/settings-quote-debug.png" alt="The quote and debug settings" />
+</p>
 
 | Setting | Default | Description |
 |---|---|---|
@@ -100,7 +112,7 @@ related option is selected (noted in the description).
 |---|---|---|
 | Debug logging | `false` | Log background and quote provider activity to the developer console. Leave off unless troubleshooting — see [Troubleshooting](troubleshooting.md). Takes effect immediately. |
 
-![The quote and debug settings](../assets/settings-quote-debug.png)
+
 
 ## Tips
 

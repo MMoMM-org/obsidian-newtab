@@ -52,7 +52,7 @@ offers a **one-time, opt-in, non-destructive** import on first run — and leave
 ## Documentation
 
 - [Installation](docs/installation.md)
-- [Configuration](docs/configuration.md) — Generated from `src/Settings/Settings.ts`.
+- [Configuration](docs/configuration.md)
 - [Usage](docs/usage.md)
 - [Troubleshooting](docs/troubleshooting.md)
 <!-- doc-product:documentation:end -->
