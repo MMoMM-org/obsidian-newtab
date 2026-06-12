@@ -4,6 +4,8 @@ NewTab is derived from [BeautiTab](https://github.com/andrewmcgivery/obsidian-be
 so it can import your existing BeautiTab configuration in one click instead of
 making you reconfigure everything by hand.
 
+![The one-time BeautiTab import dialog, with a folder picker for local background images and Import / Cancel buttons](../assets/import-dialog.png)
+
 ## How it works
 
 - **Opt-in, never silent.** NewTab does *not* read or copy BeautiTab's settings
@@ -17,6 +19,8 @@ making you reconfigure everything by hand.
 - **Non-destructive.** The import *merges* BeautiTab's values over your current
   NewTab settings — it never wipes settings you've already changed, and you can
   keep adjusting everything afterwards.
+
+![The Import from BeautiTab button at the top of the NewTab settings tab](../assets/import-settings-button.png)
 
 Both the original BeautiTab and the maintained fork are supported (they share the
 same plugin id and settings file), so the import works regardless of which build
@@ -47,6 +51,8 @@ you run.
 - BeautiTab's transient background cache is ignored.
 
 ## After importing
+
+![The post-import checklist NewTab shows when the import finishes](../assets/import-complete.png)
 
 When the import finishes, NewTab shows a short checklist. The things worth doing:
 

@@ -31,6 +31,10 @@ related option is selected (noted in the description).
 > image from your device into the background folder so it joins the rotation —
 > it is an action, not a stored setting.
 
+![The NewTab settings tab, showing the background settings and the plugin header](../assets/settings-background.png)
+
+![The background theme dropdown listing every available theme](../assets/settings-background-themes.png)
+
 ### Search
 
 | Setting | Default | Description |
@@ -47,6 +51,8 @@ related option is selected (noted in the description).
 | Show time | `true` | Show the clock in the middle of the new tab. |
 | Time format | `12-hour` | Display the time in 12-hour or 24-hour format. |
 
+![The search and time settings](../assets/settings-search-time.png)
+
 ### Greeting
 
 | Setting | Default | Description |
@@ -60,6 +66,8 @@ related option is selected (noted in the description).
 | Setting | Default | Description |
 |---|---|---|
 | Show recent files | `true` | Show recently opened files in the middle of the new tab. |
+
+![The greeting and recent-files settings](../assets/settings-greeting-recent.png)
 
 ### Bookmarks
 
@@ -91,6 +99,8 @@ related option is selected (noted in the description).
 | Setting | Default | Description |
 |---|---|---|
 | Debug logging | `false` | Log background and quote provider activity to the developer console. Leave off unless troubleshooting — see [Troubleshooting](troubleshooting.md). Takes effect immediately. |
+
+![The quote and debug settings](../assets/settings-quote-debug.png)
 
 ## Tips
 
