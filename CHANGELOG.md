@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.1.0...0.2.0) (2026-06-12)
+
+
+### Features
+
+* give the new-tab view a layout-dashboard icon ([fc5e42d](https://github.com/MMoMM-org/obsidian-newtab/commit/fc5e42da00aae4fe056910c981c99757929781db))
+
 # [0.1.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.0.0...0.1.0) (2026-06-12)
 
 
