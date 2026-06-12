@@ -36,7 +36,9 @@ export class ReactView extends FileView {
 	}
 
 	getIcon() {
-		return "";
+		// Lucide "layout-dashboard" — the new tab is a customizable widget
+		// dashboard (clock, greeting, search, bookmarks, recents, quote).
+		return "layout-dashboard";
 	}
 
 	async onOpen() {
