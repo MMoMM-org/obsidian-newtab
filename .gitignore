@@ -25,6 +25,10 @@ test/*/.obsidian/plugins/*/assets/
 # Per-developer Obsidian workspace state inside test vaults
 test/*/.obsidian/workspace*
 
+# Local test-vault scratch — large binary fixtures and exports, not sources
+test/*.zip
+test/*/Pictures/
+
 # Test coverage
 coverage/
 
