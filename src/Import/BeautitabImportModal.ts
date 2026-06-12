@@ -3,8 +3,10 @@ import type NewTabPlugin from "main";
 import { FolderSuggest } from "src/Settings/FolderSuggest";
 import {
 	DEFAULT_IMPORT_IMAGE_FOLDER,
+	ImportResult,
 	importFromBeautitab,
 } from "src/Import/Beautitab";
+import { BackgroundTheme } from "src/Types/Enums";
 
 /**
  * One-time, opt-in BeautiTab → New Tab import. Summarises what carries over,
@@ -62,46 +64,88 @@ export class BeautitabImportModal extends Modal {
 	}
 
 	private async runImport(): Promise<void> {
+		let result: ImportResult;
 		try {
-			const result = await importFromBeautitab(
+			result = await importFromBeautitab(
 				this.plugin,
 				this.folder.trim() || DEFAULT_IMPORT_IMAGE_FOLDER
 			);
-
-			if (!result.imported) {
-				new Notice("No BeautiTab data found to import.");
-				return;
-			}
-
-			const parts = ["Imported BeautiTab settings."];
-			if (result.imageCount > 0) {
-				parts.push(
-					`${result.imageCount} background image${
-						result.imageCount === 1 ? "" : "s"
-					} copied.`
-				);
-			}
-			if (result.keyImported) {
-				parts.push("Unsplash key stored securely.");
-			}
-			new Notice(parts.join(" "));
-
-			if (result.needsUnsplashKey) {
-				new Notice(
-					"Your background theme needs an Unsplash access key. Add one under NewTab settings → background settings.",
-					10000
-				);
-			}
 		} catch (error) {
 			new Notice("BeautiTab import failed. See the console for details.");
 			console.error("BeautiTab import failed", error);
-		} finally {
 			this.close();
-			this.onComplete?.();
+			return;
 		}
+
+		if (!result.imported) {
+			new Notice("No BeautiTab data found to import.");
+			this.close();
+			return;
+		}
+
+		this.renderComplete(result);
+	}
+
+	/**
+	 * Replace the modal with a persistent summary and a short "what to do next"
+	 * checklist, so the post-migration steps don't vanish like a transient notice.
+	 */
+	private renderComplete(result: ImportResult): void {
+		const { contentEl } = this;
+		contentEl.empty();
+
+		contentEl.createEl("h2", { text: "BeautiTab import complete" });
+
+		const summary = ["Your BeautiTab settings were merged into NewTab."];
+		if (result.imageCount > 0) {
+			const folder = this.folder.trim() || DEFAULT_IMPORT_IMAGE_FOLDER;
+			summary.push(
+				`${result.imageCount} background image${
+					result.imageCount === 1 ? "" : "s"
+				} copied to “${folder}”.`
+			);
+		}
+		if (result.keyImported) {
+			summary.push(
+				"Your Unsplash access key was moved into Obsidian's secure secret store."
+			);
+		}
+		contentEl.createEl("p", { text: summary.join(" ") });
+
+		contentEl.createEl("p", { text: "A few things to finish up:" });
+		const steps = contentEl.createEl("ol");
+		const addStep = (text: string): void => {
+			steps.createEl("li", { text });
+		};
+
+		if (result.needsUnsplashKey) {
+			addStep(
+				"Your background theme uses Unsplash but no key came across — add your own access key under background settings (the link is right there)."
+			);
+		}
+		if (
+			result.imageCount > 0 &&
+			this.plugin.settings.backgroundTheme !== BackgroundTheme.LOCAL
+		) {
+			addStep(
+				"To actually show the imported background images, set the background theme to “local”."
+			);
+		}
+		addStep("Review your NewTab settings and adjust anything you like.");
+		addStep(
+			"Once you're happy, disable BeautiTab — and uninstall it whenever you're ready. NewTab has your settings now."
+		);
+
+		new Setting(contentEl).addButton((button) => {
+			button.setButtonText("Done").setCta();
+			button.onClick(() => this.close());
+		});
 	}
 
 	onClose(): void {
 		this.contentEl.empty();
+		// Refresh the settings tab (if that's where we came from) so the fallback
+		// import button reflects the now-completed state.
+		this.onComplete?.();
 	}
 }

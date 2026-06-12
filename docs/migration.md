@@ -48,6 +48,16 @@ you run.
 
 ## After importing
 
-If the imported background theme needs Unsplash but no key came across (the
-original BeautiTab doesn't store one), NewTab reminds you to add your own access
-key under **NewTab settings → background settings**.
+When the import finishes, NewTab shows a short checklist. The things worth doing:
+
+1. **Unsplash key (if needed).** If the imported background theme uses Unsplash
+   but no key came across (the original BeautiTab doesn't store one), add your own
+   access key under **NewTab settings → Background settings**. The link to create a
+   free key is right there in the setting.
+2. **Local images (if any).** Imported background images are saved as files in the
+   vault folder you chose. To actually display them, set the background theme to
+   **Local**.
+3. **Review.** Open the NewTab settings tab and adjust anything you like — the
+   import is a starting point, not the last word.
+4. **Retire BeautiTab.** Once you're happy, disable BeautiTab. You can uninstall it
+   whenever you're ready; NewTab has your settings now.
