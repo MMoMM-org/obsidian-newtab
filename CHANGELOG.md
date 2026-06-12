@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/MMoMM-org/obsidian-newtab/compare/0.2.0...0.2.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* drop redundant ArrayBuffer assertion in Beautitab import ([5831d2f](https://github.com/MMoMM-org/obsidian-newtab/commit/5831d2f9058613c8037b5f35b9676253d88e8268))
+
 # [0.2.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.1.0...0.2.0) (2026-06-12)
 
 
