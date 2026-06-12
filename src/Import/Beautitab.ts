@@ -231,11 +231,11 @@ const sniffImageExtension = (bytes: Uint8Array): string => {
 	return "png";
 };
 
-const toArrayBuffer = (bytes: Uint8Array): ArrayBuffer =>
-	bytes.buffer.slice(
-		bytes.byteOffset,
-		bytes.byteOffset + bytes.byteLength
-	) as ArrayBuffer;
+const toArrayBuffer = (bytes: Uint8Array): ArrayBuffer => {
+	const buffer = new ArrayBuffer(bytes.byteLength);
+	new Uint8Array(buffer).set(bytes);
+	return buffer;
+};
 
 /**
  * Decode BeautiTab's inline base64 backgrounds and write them as real image
