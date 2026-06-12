@@ -10,12 +10,29 @@ import {
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import { themeUsesUnsplash } from "src/Utils/themeUsesUnsplash";
 import { uniqueVaultPath } from "src/Utils/uniqueVaultPath";
+import { isCommunityPluginEnabled } from "src/Types/ObsidianInternals";
 
 /**
  * BeautiTab and its Mara-Li fork share plugin id `beautitab`, so their settings
  * live at the same path: `<configDir>/plugins/beautitab/data.json`.
  */
 export const BEAUTITAB_PLUGIN_ID = "beautitab";
+
+/**
+ * Shown when BeautiTab is enabled alongside New Tab. Both hijack new tabs via
+ * the same `layout-change` takeover, so running both makes them fight over each
+ * empty leaf and New Tab's view may never mount.
+ */
+export const BEAUTITAB_CONFLICT_MESSAGE =
+	"New Tab and BeautiTab both take over new tabs. Disable BeautiTab to avoid conflicts.";
+
+/**
+ * True when BeautiTab is currently *enabled* (active), so it competes for the
+ * new-tab takeover. Installed-but-disabled is fine — the one-time import still
+ * reads its `data.json`.
+ */
+export const isBeautitabEnabled = (app: App): boolean =>
+	isCommunityPluginEnabled(app, BEAUTITAB_PLUGIN_ID);
 
 /** BeautiTab's "online quotes" enum value (New Tab calls the same thing "Online quotes"). */
 const BEAUTITAB_QUOTE_ONLINE = "Quoteable";

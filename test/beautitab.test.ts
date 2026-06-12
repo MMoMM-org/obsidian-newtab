@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./__mocks__/obsidian";
 import {
+	BEAUTITAB_PLUGIN_ID,
 	DEFAULT_IMPORT_IMAGE_FOLDER,
 	IMPORTED_UNSPLASH_SECRET_ID,
 	extractLocalBackgrounds,
 	importFromBeautitab,
+	isBeautitabEnabled,
 	mapBeautitabSettings,
 	readBeautitabData,
 } from "../src/Import/Beautitab";
@@ -324,5 +326,22 @@ describe("importFromBeautitab", () => {
 		const result = await importFromBeautitab(plugin as never, "");
 		expect(result.imported).toBe(false);
 		expect(plugin.saveSettings).not.toHaveBeenCalled();
+	});
+});
+
+describe("isBeautitabEnabled", () => {
+	it("is false when BeautiTab is not loaded (disabled or not installed)", () => {
+		const app = new App();
+		expect(
+			isBeautitabEnabled(app as unknown as import("obsidian").App)
+		).toBe(false);
+	});
+
+	it("is true when BeautiTab is enabled (present in app.plugins.plugins)", () => {
+		const app = new App();
+		app.plugins.plugins[BEAUTITAB_PLUGIN_ID] = {};
+		expect(
+			isBeautitabEnabled(app as unknown as import("obsidian").App)
+		).toBe(true);
 	});
 });

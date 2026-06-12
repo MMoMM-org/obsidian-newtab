@@ -47,6 +47,13 @@ interface AppInternals {
 export const appInternals = (app: App): App & AppInternals =>
 	app as App & AppInternals;
 
+/**
+ * True when the community plugin with `id` is currently enabled. `plugins.plugins`
+ * only holds an entry once a plugin is loaded, so presence == enabled.
+ */
+export const isCommunityPluginEnabled = (app: App, id: string): boolean =>
+	id in appInternals(app).plugins.plugins;
+
 /** The core Bookmarks plugin's items, or `[]` when it is disabled. */
 export const getBookmarkItems = (app: App): BookmarkItem[] => {
 	const instance = appInternals(app).internalPlugins.plugins.bookmarks

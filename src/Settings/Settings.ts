@@ -12,6 +12,7 @@ import {
 	PluginSettingTab,
 	Setting,
 	SecretComponent,
+	setIcon,
 	normalizePath,
 } from "obsidian";
 import ChooseSearchProvider from "src/ChooseSearchProvider/ChooseSearchProvider";
@@ -25,6 +26,10 @@ import {
 } from "src/Types/Enums";
 import { FolderSuggest } from "src/Settings/FolderSuggest";
 import { BeautitabImportModal } from "src/Import/BeautitabImportModal";
+import {
+	isBeautitabEnabled,
+	BEAUTITAB_CONFLICT_MESSAGE,
+} from "src/Import/Beautitab";
 import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
 import { themeUsesUnsplash } from "src/Utils/themeUsesUnsplash";
@@ -191,6 +196,23 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		);
 	}
 
+	/**
+	 * Persistent warning while BeautiTab is enabled — both plugins hijack new
+	 * tabs and fight over each empty leaf. Re-evaluated on every render (settings
+	 * open / in-tab re-render), so it disappears once BeautiTab is disabled.
+	 */
+	private renderConflictWarning(containerEl: HTMLElement): void {
+		if (!isBeautitabEnabled(this.app)) {
+			return;
+		}
+		const warning = containerEl.createDiv({ cls: "newtab-conflict-warning" });
+		setIcon(
+			warning.createSpan({ cls: "newtab-conflict-warning-icon" }),
+			"alert-triangle"
+		);
+		warning.createSpan({ text: BEAUTITAB_CONFLICT_MESSAGE });
+	}
+
 	hide(): void {
 		try {
 			this.headerRoot?.unmount();
@@ -331,6 +353,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		this.renderHeader(containerEl);
+
+		this.renderConflictWarning(containerEl);
 
 		this.renderBeautitabImport(containerEl);
 

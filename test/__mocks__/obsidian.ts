@@ -75,6 +75,11 @@ export class App {
 	fileManager = {
 		processFrontMatter: vi.fn(),
 	};
+	// Community plugins keyed by id — present only when enabled, mirroring the
+	// internal `app.plugins.plugins` shape New Tab reads for conflict detection.
+	plugins = {
+		plugins: {} as Record<string, unknown>,
+	};
 	workspace = {
 		getActiveViewOfType: vi.fn(),
 		on: vi.fn(),

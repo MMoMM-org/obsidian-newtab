@@ -14,8 +14,12 @@ import {
 	DEFAULT_SETTINGS,
 	migrateQuoteSources,
 } from "src/Settings/Settings";
-import { setDebugLogging } from "React/Utils/debug";
-import { readBeautitabData } from "src/Import/Beautitab";
+import { setDebugLogging, debugLog } from "React/Utils/debug";
+import {
+	readBeautitabData,
+	isBeautitabEnabled,
+	BEAUTITAB_CONFLICT_MESSAGE,
+} from "src/Import/Beautitab";
 import { BeautitabImportModal } from "src/Import/BeautitabImportModal";
 
 export default class NewTabPlugin extends Plugin {
@@ -37,6 +41,12 @@ export default class NewTabPlugin extends Plugin {
 		// Apply the persisted debug-logging preference before anything logs.
 		setDebugLogging(this.settings.debugLogging);
 
+		debugLog(
+			"lifecycle",
+			"plugin loaded; debugLogging =",
+			this.settings.debugLogging
+		);
+
 		this.settingsObservable = new Observable(this.settings);
 
 		this.registerView(
@@ -51,6 +61,7 @@ export default class NewTabPlugin extends Plugin {
 		// to layout-ready so the modal doesn't open before the workspace exists.
 		this.app.workspace.onLayoutReady(() => {
 			void this.maybeOfferBeautitabImport();
+			this.warnIfBeautitabEnabled();
 		});
 
 		this.registerEvent(
@@ -156,11 +167,33 @@ export default class NewTabPlugin extends Plugin {
 	 */
 	private onLayoutChange(): void {
 		const leaf = this.app.workspace.getMostRecentLeaf();
+		// Only log/act when an empty leaf is most-recent (a new tab just opened) —
+		// logging every layout-change would flood the console. If another new-tab
+		// plugin (e.g. BeautiTab) won the race, the leaf is no longer "empty" by
+		// now, so the absence of this line is itself the diagnostic signal.
 		if (leaf?.getViewState().type === "empty") {
+			debugLog("lifecycle", "hijacking empty leaf → NewTab view");
 			void leaf.setViewState({
 				type: NEWTAB_REACT_VIEW,
 			});
 		}
+	}
+
+	/**
+	 * BeautiTab hijacks new tabs the same way New Tab does (`layout-change`
+	 * takeover), so running both makes them fight over each empty leaf and New
+	 * Tab's view may never mount. Warn once on load when BeautiTab is enabled.
+	 * Installed-but-disabled is fine; the one-time import still reads its data.
+	 */
+	private warnIfBeautitabEnabled(): void {
+		if (!isBeautitabEnabled(this.app)) {
+			return;
+		}
+		debugLog(
+			"lifecycle",
+			"BeautiTab is enabled — both plugins take over new tabs (conflict)"
+		);
+		new Notice(BEAUTITAB_CONFLICT_MESSAGE, 10000);
 	}
 
 	/**
