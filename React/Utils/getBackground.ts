@@ -152,11 +152,13 @@ const getSeasonalTag = (date: Date) => {
 const UNSPLASH_CACHE_PREFIX = "newtab:unsplash:";
 
 /**
- * Today as YYYY-MM-DD, used as the cache bucket so a themed background stays
- * stable for the day (matching the old per-day `cachetag` behaviour) and we
- * make at most one API call per tag per day — well under the 50/hour demo limit.
+ * The current UTC hour as YYYY-MM-DDTHH, used as the cache bucket so a themed
+ * background changes when the hour rolls over (the App re-resolves on the hour
+ * boundary) while staying stable within the hour — at most one API call per tag
+ * per hour, comfortably under the 50/hour demo limit. UTC keeps the bucket
+ * boundary deterministic across DST/timezones.
  */
-const todayStamp = (): string => new Date().toISOString().slice(0, 10);
+export const hourStamp = (): string => new Date().toISOString().slice(0, 13);
 
 const readCache = (key: string): string | null => {
 	try {
@@ -168,14 +170,14 @@ const readCache = (key: string): string | null => {
 
 const writeCache = (key: string, value: string): void => {
 	try {
-		// Drop stale entries from previous days so the cache stays bounded.
-		const today = todayStamp();
+		// Drop stale entries from previous hours so the cache stays bounded.
+		const now = hourStamp();
 		for (let i = window.localStorage.length - 1; i >= 0; i--) {
 			const k = window.localStorage.key(i);
 			if (
 				k &&
 				k.startsWith(UNSPLASH_CACHE_PREFIX) &&
-				!k.endsWith(`:${today}`)
+				!k.endsWith(`:${now}`)
 			) {
 				window.localStorage.removeItem(k);
 			}
@@ -196,11 +198,11 @@ const fetchUnsplashBackground = async (
 	query: string,
 	accessKey: string | null
 ): Promise<string | null> => {
-	const cacheKey = `${UNSPLASH_CACHE_PREFIX}${query}:${todayStamp()}`;
+	const cacheKey = `${UNSPLASH_CACHE_PREFIX}${query}:${hourStamp()}`;
 
 	const cached = readCache(cacheKey);
 	if (cached) {
-		debugLog("background", `cache hit for "${query}" — using today's image`);
+		debugLog("background", `cache hit for "${query}" — using this hour's image`);
 		return cached;
 	}
 

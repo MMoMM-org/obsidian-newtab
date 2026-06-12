@@ -8,6 +8,13 @@ import NewTabPlugin from "main";
 
 export const NEWTAB_REACT_VIEW = "newtab-react-view";
 
+// Obsidian ships a global i18next instance for its own UI strings. We reuse it
+// (read-only) for the tab title; declare the minimal surface we touch rather
+// than taking on the i18next dependency. Full UI localization is tracked in #25.
+declare const i18next: {
+	t(key: string, options?: { defaultValue?: string }): string;
+};
+
 export class ReactView extends FileView {
 	root: Root | null = null;
 	app: App;
@@ -32,7 +39,12 @@ export class ReactView extends FileView {
 	}
 
 	getDisplayText() {
-		return "New tab";
+		// Follow Obsidian's display language for the tab title by reusing
+		// Obsidian's own translation for "New tab" (its built-in empty-tab
+		// label). i18next is the global instance Obsidian ships; the
+		// defaultValue keeps the English label if the key is ever absent, so
+		// this can only improve on the previous hardcoded string.
+		return i18next.t("interface.label-new-tab", { defaultValue: "New tab" });
 	}
 
 	getIcon() {
