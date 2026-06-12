@@ -1,14 +1,14 @@
 # GitHub CodeQL static analysis. Stock template, no per-repo edits required.
-# CodeQL runs on push/PR to master plus a weekly cron — failed checks surface
+# CodeQL runs on push/PR to main plus a weekly cron — failed checks surface
 # as Security alerts in the GitHub repo.
 
 name: "CodeQL Advanced"
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main"]
   pull_request:
-    branches: ["master"]
+    branches: ["main"]
   schedule:
     - cron: "25 7 * * 4"
 
