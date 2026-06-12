@@ -8,7 +8,9 @@ a quote, quick search, bookmarks, and recently edited files.
 > [obsidian-beautitab](https://github.com/andrewmcgivery/obsidian-beautitab)
 > by Andrew McGivery (MIT). See [Attribution](#attribution).
 
-![The New Tab dashboard: a full-screen background, a clock, a greeting, a search box, recent files and bookmarks, and a quote](assets/new-tab-dashboard.png)
+<p align="center">
+  <img src="assets/new-tab-dashboard.png" alt="The New Tab dashboard: a full-screen background, a clock, a greeting, a search box, recent files and bookmarks, and a quote" />
+</p>
 
 ## Features
 
