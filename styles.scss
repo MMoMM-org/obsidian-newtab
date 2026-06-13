@@ -23,6 +23,27 @@
 	}
 }
 
+// Conflict warning at the top of the settings tab when BeautiTab is also
+// enabled — both plugins hijack new tabs and fight over each empty leaf.
+.newtab-conflict-warning {
+	display: flex;
+	align-items: center;
+	gap: 0.6em;
+	margin-bottom: 1em;
+	padding: 0.7em 0.9em;
+	border: 1px solid var(--background-modifier-error);
+	border-radius: var(--radius-m);
+	background: var(--background-secondary);
+	color: var(--text-error);
+	font-size: var(--font-ui-small);
+
+	.newtab-conflict-warning-icon {
+		display: inline-flex;
+		flex-shrink: 0;
+		color: var(--text-error);
+	}
+}
+
 // Search-provider settings: the selected provider sits on its own line under
 // the description (in the info block), so the long description can run almost
 // to the Change button without truncating the value.
