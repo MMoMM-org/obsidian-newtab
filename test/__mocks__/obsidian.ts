@@ -93,7 +93,16 @@ export class App {
 	};
 	secretStorage = {
 		getSecret: vi.fn((_id: string): string | null => null),
-		setSecret: vi.fn(),
+		// Mirror Obsidian: the secret *id* must be lowercase letters, numbers,
+		// and dashes (≤64 chars). The value is unrestricted. Throwing here lets
+		// tests catch an invalid id (the import-with-key path relies on this).
+		setSecret: vi.fn((id: string, _value: string) => {
+			if (/^[a-z0-9-]{1,64}$/.test(id) === false) {
+				throw new Error(
+					"Secret ID is invalid. Use only lowercase letters, numbers and dashes. 64 characters max.",
+				);
+			}
+		}),
 		removeSecret: vi.fn(),
 	};
 }
