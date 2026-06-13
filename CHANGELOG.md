@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/MMoMM-org/obsidian-newtab/compare/1.0.0...1.0.1) (2026-06-13)
+
+
+### Bug Fixes
+
+* use a valid secret id for the imported Unsplash key ([#33](https://github.com/MMoMM-org/obsidian-newtab/issues/33)) ([52bfa52](https://github.com/MMoMM-org/obsidian-newtab/commit/52bfa523e8f58941b75e899e45b560f657a1087b))
+
 # [1.0.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.4.0...1.0.0) (2026-06-13)
 
 
