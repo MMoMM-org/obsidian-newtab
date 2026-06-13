@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.3.0...0.4.0) (2026-06-13)
+
+
+### Features
+
+* warn when BeautiTab is enabled + lifecycle logging ([#27](https://github.com/MMoMM-org/obsidian-newtab/issues/27)) ([d2deb7f](https://github.com/MMoMM-org/obsidian-newtab/commit/d2deb7f70e725227ed6012cf34f106535a45b389))
+
 # [0.3.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.2.1...0.3.0) (2026-06-12)
 
 
