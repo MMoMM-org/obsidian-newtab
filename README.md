@@ -95,7 +95,7 @@ language** dropdown automatically.
 ## Privacy
 
 New Tab is local-first and makes only a few optional, toggleable network requests
-(backgrounds, quotes, update check). See [PRIVACY.md](PRIVACY.md).
+(backgrounds, quotes). See [PRIVACY.md](PRIVACY.md).
 
 ## Attribution
 

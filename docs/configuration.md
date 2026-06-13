@@ -22,8 +22,8 @@ related option is selected (noted in the description).
 
 | Setting | Default | Description |
 |---|---|---|
-| Background theme | `Seasons and holidays` | Theme for the random background. "Seasons and holidays" varies by time of year; "Custom" lets you supply a URL; "Local" uses imported images; "Transparent" shows your Obsidian theme. |
-| Unsplash access key | _(unset)_ | Required for themed backgrounds. Create a free app at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications) and paste its access key. Stored securely outside `data.json`. Shown only for Unsplash-backed themes. |
+| Background theme | `Seasons and holidays` | Theme for the random background. **Seasons and holidays** varies by time of year; the fixed subjects **Winter, Spring, Summer, Fall, Mountains, Lakes, Forest, Animals** each always pull that subject; **Custom topic** uses your own search term; **Custom** lets you supply a URL; **Local** uses imported images; **Transparent** and **Transparent with shadows** show your Obsidian theme. The first ten (Seasons and holidays, the eight fixed subjects, and Custom topic) are Unsplash-backed and need an access key. |
+| Unsplash access key | _(unset)_ | Required for the Unsplash-backed themes. Create a free app at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications) and paste its access key. Stored securely outside `data.json`. Shown only for Unsplash-backed themes. |
 | Custom topic | `""` | Search term(s) used to pick a random Unsplash photo, e.g. "ocean sunset". Shown only when the theme is "Custom topic". |
 | Custom background URL | `""` | The URL to use for the background image. Shown only when the theme is "Custom". |
 | Background image folder | `""` | When the theme is "Local", a random image from this vault folder (and subfolders) is shown. |
