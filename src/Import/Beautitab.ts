@@ -37,9 +37,14 @@ export const isBeautitabEnabled = (app: App): boolean =>
 /** BeautiTab's "online quotes" enum value (New Tab calls the same thing "Online quotes"). */
 const BEAUTITAB_QUOTE_ONLINE = "Quoteable";
 
-/** SecretStorage id the imported Unsplash key is stored under. */
+/**
+ * SecretStorage id the imported Unsplash key is stored under. Obsidian's
+ * `setSecret` requires the id to be lowercase letters, numbers, and dashes
+ * (≤64 chars) — a human-readable string with spaces/capitals/parentheses is
+ * rejected and aborts the whole import.
+ */
 export const IMPORTED_UNSPLASH_SECRET_ID =
-	"Unsplash access key (imported from Beautitab)";
+	"unsplash-access-key-imported-from-beautitab";
 
 /** Default vault folder for extracted BeautiTab background images. */
 export const DEFAULT_IMPORT_IMAGE_FOLDER = "Beautitab backgrounds";

@@ -295,6 +295,12 @@ describe("importFromBeautitab", () => {
 		expect(plugin.saveSettings).toHaveBeenCalled();
 	});
 
+	it("stores the imported key under a valid Obsidian secret id", () => {
+		// setSecret rejects ids that aren't lowercase letters / numbers / dashes
+		// (≤64 chars); an invalid id aborts the whole import (issue #33).
+		expect(IMPORTED_UNSPLASH_SECRET_ID).toMatch(/^[a-z0-9-]{1,64}$/);
+	});
+
 	it("does not flag needsUnsplashKey once a key was imported (spring is an Unsplash theme)", async () => {
 		const app = new App();
 		app.vault.adapter.exists = vi.fn(async () => true);
