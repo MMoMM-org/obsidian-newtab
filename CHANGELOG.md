@@ -1,3 +1,16 @@
+# [1.0.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.4.0...1.0.0) (2026-06-13)
+
+
+### Features
+
+* graduate to a stable 1.0.0 release ([56cd081](https://github.com/MMoMM-org/obsidian-newtab/commit/56cd081f651e4095a36ce9718e9721d10166c52e))
+
+
+### BREAKING CHANGES
+
+* first stable release (1.0.0). No code changes — this marks
+the graduation from 0.x to a stable, semver-governed API.
+
 # [0.4.0](https://github.com/MMoMM-org/obsidian-newtab/compare/0.3.0...0.4.0) (2026-06-13)
 
 
