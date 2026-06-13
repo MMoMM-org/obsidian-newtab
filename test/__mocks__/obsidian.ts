@@ -484,6 +484,10 @@ export const getAllTags = vi.fn(
 	(_cache: CachedMetadata): string[] | null => null,
 );
 
+// Obsidian's display-language code (e.g. "en", "de"). Tests override via
+// vi.mocked(getLanguage).mockReturnValue(...).
+export const getLanguage = vi.fn((): string => "en");
+
 // --- Factories ---
 
 export function createMockTFile(overrides?: Partial<{

@@ -1,5 +1,6 @@
 import { getBookmarkGroups } from "React/Utils/getBookmarks";
 import { debugLog, setDebugLogging } from "React/Utils/debug";
+import { t } from "React/Utils/i18n";
 import {
 	GREETINGS,
 	LANGUAGE_LABELS,
@@ -322,14 +323,14 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			return;
 		}
 
-		new Setting(containerEl).setHeading().setName("Import from BeautiTab");
+		new Setting(containerEl).setHeading().setName(t("import.heading"));
 		new Setting(containerEl)
-			.setName("Import BeautiTab settings")
+			.setName(t("import.name"))
 			.setDesc(
 				"BeautiTab is set up in this vault. Copy its configuration into NewTab — non-destructive, runs once."
 			)
 			.addButton((button) => {
-				button.setButtonText("Import from BeautiTab").setCta();
+				button.setButtonText(t("import.button")).setCta();
 				button.onClick(() => {
 					new BeautitabImportModal(this.plugin, () =>
 						this.render()
@@ -361,10 +362,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Background settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Background settings`);
+		new Setting(containerEl).setHeading().setName(t("background.heading"));
 
 		new Setting(containerEl)
-			.setName("Background theme")
+			.setName(t("background.theme"))
 			.setDesc(
 				`What theme would you like to utilize for the random backgrounds? "seasons and holidays" will use a different tag depending on the time of the year. Custom will allow you to input your own URL. Local will use the local images imported below.`
 			)
@@ -387,7 +388,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 
 		if (themeUsesUnsplash(this.plugin.settings.backgroundTheme)) {
 			const unsplashKeySetting = new Setting(containerEl)
-				.setName("Unsplash access key")
+				.setName(t("background.unsplashKey"))
 				.setDesc(
 					createFragment((frag) => {
 						frag.appendText(
@@ -425,7 +426,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			BackgroundTheme.CUSTOM_TOPIC
 		) {
 			new Setting(containerEl)
-				.setName("Custom topic")
+				.setName(t("background.customTopic"))
 				.setDesc(
 					`Search term(s) used to pick a random Unsplash photo, e.g. "ocean sunset" or "tokyo at night".`
 				)
@@ -443,7 +444,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 
 		if (this.plugin.settings.backgroundTheme === BackgroundTheme.CUSTOM) {
 			new Setting(containerEl)
-				.setName("Custom background URL")
+				.setName(t("background.customUrl"))
 				.setDesc(`What URL should be used for the background image?`)
 				.addText((component) => {
 					component.setValue(this.plugin.settings.customBackground);
@@ -459,7 +460,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		}
 
 		new Setting(containerEl)
-			.setName("Background image folder")
+			.setName(t("background.imageFolder"))
 			.setDesc(
 				`When the background theme is "local", a random image from this vault folder (and its subfolders) is shown. Manage the images by adding to or deleting from the folder in your vault.`
 			)
@@ -483,12 +484,12 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Transfer local image to vault")
+			.setName(t("background.transferImage"))
 			.setDesc(
 				`Copy an image from your device into the background image folder above so it joins the rotation. Files are copied in, so the plugin never reads outside your vault.`
 			)
 			.addButton((component) => {
-				component.setButtonText("Add local image");
+				component.setButtonText(t("background.addLocalImage"));
 				component.onClick(() => {
 					this.transferLocalImagesToVault();
 				});
@@ -497,10 +498,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Search settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Search settings`);
+		new Setting(containerEl).setHeading().setName(t("search.heading"));
 
 		new Setting(containerEl)
-			.setName("Show top left search button")
+			.setName(t("search.showTopLeft"))
 			.setDesc(
 				`Should the search button at the top left of the new tab screen be displayed?`
 			)
@@ -519,14 +520,14 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		const topLeftSearchProviderSetting = new Setting(containerEl)
-			.setName("Top left search provider")
+			.setName(t("search.topLeftProvider"))
 			.setDesc(
 				`Which plugin should be utilized for search when clicking the top left button?`
 			)
 			.setClass("newtab-search-provider")
 			.addButton((component) => {
-				component.setButtonText("Change");
-				component.setTooltip("Choose search provider");
+				component.setButtonText(t("search.change"));
+				component.setTooltip(t("search.chooseProvider"));
 				component.onClick(() => {
 					new ChooseSearchProvider(
 						this.app,
@@ -548,7 +549,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		);
 
 		new Setting(containerEl)
-			.setName("Show inline search")
+			.setName(t("search.showInline"))
 			.setDesc(
 				`Should the inline search in the middle of the new tab screen be displayed?`
 			)
@@ -565,14 +566,14 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		const inlineSearchProviderSetting = new Setting(containerEl)
-			.setName("Inline search provider")
+			.setName(t("search.inlineProvider"))
 			.setDesc(
 				`Which plugin should be utilized for search when clicking the middle of the screen button?`
 			)
 			.setClass("newtab-search-provider")
 			.addButton((component) => {
-				component.setButtonText("Change");
-				component.setTooltip("Choose search provider");
+				component.setButtonText(t("search.change"));
+				component.setTooltip(t("search.chooseProvider"));
 				component.onClick(() => {
 					new ChooseSearchProvider(
 						this.app,
@@ -596,10 +597,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Time settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Time settings`);
+		new Setting(containerEl).setHeading().setName(t("time.heading"));
 
 		new Setting(containerEl)
-			.setName("Show time")
+			.setName(t("time.show"))
 			.setDesc(
 				`Should the time in the middle of the new tab screen be displayed?`
 			)
@@ -616,7 +617,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Time format")
+			.setName(t("time.format"))
 			.setDesc(`Should the time be in 12-hour format or 24-hour format?`)
 			.addDropdown((component) => {
 				component.addOption(
@@ -643,10 +644,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Greeting settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Greeting settings`);
+		new Setting(containerEl).setHeading().setName(t("greeting.heading"));
 
 		new Setting(containerEl)
-			.setName("Show greeting")
+			.setName(t("greeting.show"))
 			.setDesc(
 				`Should the greeting in the middle of the new tab screen be displayed?`
 			)
@@ -663,7 +664,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Greeting text")
+			.setName(t("greeting.text"))
 			.setDesc(
 				`What text should be displayed as a greeting? You can use the {{greeting}} to add a greeting based on the time of the day. (E.g. Good morning)`
 			)
@@ -679,7 +680,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Greeting language")
+			.setName(t("greeting.language"))
 			.setDesc(
 				`Language for the {{greeting}} time-of-day phrase. Auto follows Obsidian's display language; pick a specific language to greet in a different one (e.g. English Obsidian, German greeting).`
 			)
@@ -706,10 +707,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Recent file settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Recent file settings`);
+		new Setting(containerEl).setHeading().setName(t("recent.heading"));
 
 		new Setting(containerEl)
-			.setName("Show recent files")
+			.setName(t("recent.show"))
 			.setDesc(
 				`Should recent files in the middle of the new tab screen be displayed?`
 			)
@@ -728,10 +729,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Bookmark settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Bookmark settings`);
+		new Setting(containerEl).setHeading().setName(t("bookmarks.heading"));
 
 		new Setting(containerEl)
-			.setName("Show bookmarks")
+			.setName(t("bookmarks.show"))
 			.setDesc(
 				`Should bookmarks in the middle of the new tab screen be displayed?`
 			)
@@ -748,7 +749,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Bookmarks source")
+			.setName(t("bookmarks.source"))
 			.setDesc(
 				`Should all bookmarks be displayed or bookmarks from a specific group?`
 			)
@@ -772,7 +773,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 
 		if (this.plugin.settings.bookmarkSource === BOOKMARK_SOURCE.GROUP) {
 			new Setting(containerEl)
-				.setName("Bookmarks group")
+				.setName(t("bookmarks.group"))
 				.setDesc(`Which group should bookmarks be pulled from?`)
 				.addDropdown((component) => {
 					getBookmarkGroups(this.app).forEach((group) => {
@@ -794,10 +795,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Quote settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Quote settings`);
+		new Setting(containerEl).setHeading().setName(t("quote.heading"));
 
 		new Setting(containerEl)
-			.setName("Show quote")
+			.setName(t("quote.show"))
 			.setDesc(
 				`Should the quote at the bottom of the new tab screen be displayed?`
 			)
@@ -820,7 +821,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		};
 
 		new Setting(containerEl)
-			.setName("Online quotes")
+			.setName(t("quote.online"))
 			.setDesc(
 				`Random quotes from ZenQuotes (requires an internet connection).`
 			)
@@ -833,7 +834,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("My quotes")
+			.setName(t("quote.mine"))
 			.setDesc(
 				`Your own quotes, stored in the plugin settings (${this.plugin.settings.customQuotes.length} saved).`
 			)
@@ -845,7 +846,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			})
 			.addButton((component) => {
-				component.setButtonText("Edit");
+				component.setButtonText(t("quote.edit"));
 				component.onClick(() => {
 					new CustomQuotesModel(
 						this.plugin,
@@ -860,7 +861,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Vault notes")
+			.setName(t("quote.vault"))
 			.setDesc(
 				`Use quotes stored in your notes' frontmatter, selected by tag or folder.`
 			)
@@ -875,7 +876,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 
 		if (this.plugin.settings.quoteUseVaultNotes) {
 			new Setting(containerEl)
-				.setName("Note selection")
+				.setName(t("quote.noteSelection"))
 				.setDesc(`Find quote notes by tag or by folder.`)
 				.addDropdown((component) => {
 					component.addOption(VAULT_QUOTE_SELECTION.TAG, "Tag");
@@ -898,7 +899,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				VAULT_QUOTE_SELECTION.TAG
 			) {
 				new Setting(containerEl)
-					.setName("Tag")
+					.setName(t("quote.tag"))
 					.setDesc(
 						`Notes carrying this tag (frontmatter or inline) are used as quotes.`
 					)
@@ -912,7 +913,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 					});
 			} else {
 				new Setting(containerEl)
-					.setName("Folder")
+					.setName(t("quote.folder"))
 					.setDesc(
 						`Notes in this folder and its subfolders are used as quotes.`
 					)
@@ -937,7 +938,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			}
 
 			new Setting(containerEl)
-				.setName("Quote property")
+				.setName(t("quote.property"))
 				.setDesc(`Frontmatter property holding the quote text.`)
 				.addText((component) => {
 					component.setPlaceholder("Quote");
@@ -951,7 +952,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 
 			new Setting(containerEl)
-				.setName("Author property")
+				.setName(t("quote.authorProperty"))
 				.setDesc(`Frontmatter property holding the author.`)
 				.addText((component) => {
 					component.setPlaceholder("Author");
@@ -968,10 +969,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		/****************************************
 		 * Debug settings
 		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Debug settings`);
+		new Setting(containerEl).setHeading().setName(t("debug.heading"));
 
 		new Setting(containerEl)
-			.setName("Debug logging")
+			.setName(t("debug.logging"))
 			.setDesc(
 				createFragment((frag) => {
 					frag.appendText(

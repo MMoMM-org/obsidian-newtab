@@ -1,3 +1,5 @@
+import { t } from "React/Utils/i18n";
+
 export interface SettingsHeaderProps {
 	name: string;
 	version: string;
@@ -34,7 +36,7 @@ const SettingsHeader = ({
 				</>
 			)}
 			<span className="newtab-settings-header-sep"> · </span>
-			<a href={documentationUrl}>Documentation</a>
+			<a href={documentationUrl}>{t("header.documentation")}</a>
 		</div>
 	);
 };
