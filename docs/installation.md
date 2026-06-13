@@ -40,14 +40,15 @@ empty tab is replaced automatically with the New Tab view (background, clock and
 quote, and a search box). There is no command or ribbon icon to run — hijacking
 the empty new-tab view is how the plugin works.
 
-If a new tab stays empty, confirm **New Tab** is listed and enabled under
-**Settings → Community plugins**.
+If a new tab stays empty or shows something else, confirm **New Tab** is listed
+and enabled under **Settings → Community plugins**, and that no other "new tab"
+plugin (such as BeautiTab) is enabled alongside it — see
+[Troubleshooting](troubleshooting.md#new-tabs-show-a-different-page-or-nothing).
 
 ## Updating
 
 - **Community Plugins:** open **Settings → Community plugins → Check for
-  updates**, then update New Tab. The plugin also checks for a newer version on
-  load and shows a notice when one is available.
+  updates**, then update New Tab. Obsidian handles update notifications.
 - **BRAT (pre-release):** BRAT updates beta plugins automatically on Obsidian
   start. To update on demand, run **BRAT: Check for updates to all beta
   plugins**.

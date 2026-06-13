@@ -15,7 +15,7 @@ doing to the developer console.
 The toggle takes effect immediately — no need to restart Obsidian — but only
 *new* actions produce log lines. If you turn it on while a new tab is already
 open, open a fresh tab to see anything (the current one already resolved, and
-the background is cached for the day).
+the background is cached for the hour).
 
 The access key itself is never logged — only its length.
 
@@ -27,7 +27,7 @@ Check the `[NewTab:background]` lines:
 |----------|---------|-----|
 | `no Unsplash access key set` | No key configured. | Settings → Background → **Unsplash access key**. Create a free app at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications) and paste its key. |
 | `status 401` / `invalid access token` | The stored key is wrong. | Copy the **Access Key** (~43 chars), *not* the **Secret key** and *not* the numeric **Application ID**. The log shows `keyLength=` to sanity-check — 8 characters usually means you grabbed the Application ID. |
-| `status 403` | Rate limit reached. | The Unsplash demo tier allows 50 requests/hour. The image is cached per day, so normal use stays well under it — wait an hour. |
+| `status 403` | Rate limit reached. | The Unsplash demo tier allows 50 requests/hour. The image is cached per hour (one request per theme per hour), so normal use stays well under it — wait an hour. |
 | `200 OK but no urls.regular` | Unexpected response. | Transient; try again later. |
 
 A *themed* background (Seasons and Holidays, Custom topic, …) needs an access
@@ -41,9 +41,18 @@ Check the `[NewTab:quote]` lines. ZenQuotes is key-free; on any failure
 custom quotes silently — you won't get a console error. To stay fully offline,
 set the quote source to **My quotes**.
 
-## "Update available" notice
+## New tabs show a different page (or nothing)
 
-On load the plugin checks GitHub for a newer version.
+New Tab takes over empty tabs. So does **BeautiTab** and any other "new tab"
+plugin — when more than one is enabled they fight over each empty tab, and the
+other one can win, so New Tab never appears (and produces no log lines, because
+its view never mounts).
+
+New Tab warns about this: with BeautiTab **enabled** you'll see a notice on load
+and a banner at the top of New Tab's settings tab. **Fix:** disable the other
+new-tab plugin (Settings → Community plugins). BeautiTab can stay *installed* —
+the one-time [import](migration.md) still reads its data; it just shouldn't be
+*enabled* alongside New Tab.
 
 ## Known issue: disabling the plugin while a New Tab is the active tab
 
