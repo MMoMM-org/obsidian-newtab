@@ -4,13 +4,13 @@ A plugin for [Obsidian](https://obsidian.md) that replaces the empty new-tab
 view with a customizable dashboard — beautiful backgrounds, a clock, a greeting,
 a quote, quick search, bookmarks, and recently edited files.
 
-> This is a personal version of, and derived from,
-> [obsidian-beautitab](https://github.com/andrewmcgivery/obsidian-beautitab)
-> by Andrew McGivery (MIT). See [Attribution](#attribution).
-
 <p align="center">
   <img src="assets/new-tab-dashboard.png" alt="The New Tab dashboard: a full-screen background, a clock, a greeting, a search box, recent files and bookmarks, and a quote" />
 </p>
+
+> This is a personal version of, and derived from,
+> [obsidian-beautitab](https://github.com/andrewmcgivery/obsidian-beautitab)
+> by Andrew McGivery (MIT). See [Attribution](#attribution).
 
 ## Features
 
