@@ -25,3 +25,22 @@ Settings (including any custom background paths and custom quotes) are stored in
 the plugin's `data.json` inside your vault, managed by Obsidian. Your Unsplash
 access key is kept in Obsidian's secret store, not in `data.json` — only the
 secret's ID is saved in settings.
+
+The resolved background image URL is cached in the browser's `localStorage`
+(keyed per theme, per hour) so an open tab doesn't re-hit Unsplash on every
+render. This is a per-device, throwaway cache — it holds only an image URL, is
+re-derivable at any time, and is deliberately kept out of `data.json` so it is
+never replicated by Obsidian Sync.
+
+## Vault access
+
+To build its widgets, New Tab reads your vault through the Obsidian API only:
+
+- **Recent files** and **bookmarks** read Obsidian's own lists (recently opened
+  files, the core Bookmarks plugin).
+- **Vault-note quotes** and **local backgrounds**, when enabled, enumerate file
+  paths in the vault (or a chosen folder) to find candidate notes/images, then
+  read the matched files. This means the plugin can see your file paths — it is
+  used solely to populate these two optional features and nothing is sent
+  anywhere. Disable *Vault notes* (quotes) and use a non-Local background theme
+  if you prefer it not to enumerate.
