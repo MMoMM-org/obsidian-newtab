@@ -26,7 +26,10 @@ export default defineConfig({
 		exclude: ["test/live/**"],
 		coverage: {
 			provider: "v8",
-			all: true,
+			// vitest 4 reports every file matched by `include` (the old `all: true`
+			// behaviour is now the default), so untested files surface as 0%. A few
+			// large uncovered TS files the v8 AST walker can't parse are reported as
+			// "excluded" rather than failing the run — that's expected, not an error.
 			include: ["src/**/*.ts", "React/**/*.ts", "main.ts"],
 			exclude: ["**/*.d.ts"],
 		},
