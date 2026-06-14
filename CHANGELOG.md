@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/MMoMM-org/obsidian-newtab/compare/1.1.0...1.1.1) (2026-06-14)
+
+
+### Bug Fixes
+
+* **easter:** use correct Gregorian computus algorithm ([0ba0da2](https://github.com/MMoMM-org/obsidian-newtab/commit/0ba0da29ae6ac02c83903214c81585334a1bb15e)), closes [#38](https://github.com/MMoMM-org/obsidian-newtab/issues/38)
+
 # [1.1.0](https://github.com/MMoMM-org/obsidian-newtab/compare/1.0.1...1.1.0) (2026-06-14)
 
 
