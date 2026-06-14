@@ -26,8 +26,9 @@ export default defineConfig({
 		exclude: ["test/live/**"],
 		coverage: {
 			provider: "v8",
-			include: ["src/**/*.ts"],
-			exclude: ["src/**/*.d.ts"],
+			all: true,
+			include: ["src/**/*.ts", "React/**/*.ts", "main.ts"],
+			exclude: ["**/*.d.ts"],
 		},
 	},
 });
