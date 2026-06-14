@@ -489,6 +489,10 @@ export function normalizePath(path: string): string {
 	return path.replace(/\\/g, "/").replace(/\/+/g, "/");
 }
 
+// Obsidian's display language. Tests that exercise locale resolution stub the
+// return value via vi.mocked(getLanguage).mockReturnValue("de").
+export const getLanguage = vi.fn((): string => "en");
+
 export const getAllTags = vi.fn(
 	(_cache: CachedMetadata): string[] | null => null,
 );
