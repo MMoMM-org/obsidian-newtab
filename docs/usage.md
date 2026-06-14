@@ -35,8 +35,9 @@ tab.
   of beside it.
 - **Show your bookmarks.** Bookmarks are off by default; enable them in settings
   to list either all bookmarks or a single bookmark group on the new tab.
-- **Read a fresh quote.** A quote appears each time the view loads. By default it
-  comes from an online source; you can instead use your own custom quotes or
+- **Read a fresh quote.** A quote appears each time the view loads, and then
+  rotates together with the background image at the top of each hour. By default
+  it comes from an online source; you can instead use your own custom quotes or
   quotes pulled from vault notes.
 
 ## Tips and shortcuts

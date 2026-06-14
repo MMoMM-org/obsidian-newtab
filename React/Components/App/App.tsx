@@ -175,6 +175,9 @@ const App = ({
 
 	/**
 	 * Get a random quote from whichever sources are enabled.
+	 *
+	 * Re-resolves on the hour boundary (via hourBucket) so the quote rotates
+	 * together with the background image, which is keyed off the same bucket.
 	 */
 	useEffect(() => {
 		void getQuote({
@@ -193,6 +196,7 @@ const App = ({
 		settings.quoteUseVaultNotes,
 		settings.customQuotes,
 		vaultQuotes,
+		hourBucket,
 	]);
 
 	/**
