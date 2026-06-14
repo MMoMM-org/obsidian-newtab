@@ -54,7 +54,7 @@ const SEASONAL_THEME = {
  * Given a date, returns a seasonal tag for use in background generation
  * @param date
  */
-const getSeasonalTag = (date: Date) => {
+export const getSeasonalTag = (date: Date) => {
 	const month = date.getMonth() + 1;
 	const day = date.getDate();
 	const year = date.getFullYear();
