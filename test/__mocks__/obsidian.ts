@@ -489,6 +489,21 @@ export function normalizePath(path: string): string {
 	return path.replace(/\\/g, "/").replace(/\/+/g, "/");
 }
 
+// Obsidian's display language. Tests that exercise locale resolution stub the
+// return value via vi.mocked(getLanguage).mockReturnValue("de").
+export const getLanguage = vi.fn((): string => "en");
+
+// HTTP helper. Tests stub per-case via
+// vi.mocked(requestUrl).mockResolvedValue({ status: 200, json: [...] }).
+// Default resolves to a non-200 so unconfigured callers fall back cleanly.
+export const requestUrl = vi.fn(
+	async (_opts: unknown): Promise<{ status: number; json: unknown; text: string }> => ({
+		status: 500,
+		json: null,
+		text: "",
+	}),
+);
+
 export const getAllTags = vi.fn(
 	(_cache: CachedMetadata): string[] | null => null,
 );
