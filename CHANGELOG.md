@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/MMoMM-org/obsidian-newtab/compare/1.0.1...1.1.0) (2026-06-14)
+
+
+### Features
+
+* rotate quote together with the background image ([b1f8b1d](https://github.com/MMoMM-org/obsidian-newtab/commit/b1f8b1dd8e91047f8846d5c022bf96c89e25be23))
+
 ## [1.0.1](https://github.com/MMoMM-org/obsidian-newtab/compare/1.0.0...1.0.1) (2026-06-13)
 
 
