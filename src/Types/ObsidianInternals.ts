@@ -1,4 +1,4 @@
-import { App } from "obsidian";
+import { App, WorkspaceLeaf } from "obsidian";
 
 /**
  * Minimal typed views over the Obsidian internal / undocumented APIs this
@@ -59,4 +59,29 @@ export const getBookmarkItems = (app: App): BookmarkItem[] => {
 	const instance = appInternals(app).internalPlugins.plugins.bookmarks
 		?.instance as BookmarksInstance | undefined;
 	return instance?.items ?? [];
+};
+
+/**
+ * Each leaf keeps its own back/forward navigation stacks. The object isn't in
+ * `obsidian.d.ts`; we read the two stack lengths (to enable/disable buttons)
+ * and call `back()`/`forward()` to navigate. `length` is all we need from the
+ * stacks, so they're typed as bare arrays.
+ */
+interface LeafHistory {
+	back(): void;
+	forward(): void;
+	backHistory: unknown[];
+	forwardHistory: unknown[];
+}
+
+/**
+ * The navigation history of a workspace leaf, or `null` if the build doesn't
+ * expose it (the API is internal, so guard rather than assume it's present).
+ */
+export const getLeafHistory = (
+	leaf: WorkspaceLeaf | null | undefined
+): LeafHistory | null => {
+	const history = (leaf as (WorkspaceLeaf & { history?: LeafHistory }) | null)
+		?.history;
+	return history && typeof history.back === "function" ? history : null;
 };

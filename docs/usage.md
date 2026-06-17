@@ -30,6 +30,9 @@ tab.
   default, or **Omnisearch**, **Switcher++**, or **Another Quick Switcher** if
   you have them installed and selected in settings.
 - **Open a recent file.** Click any entry in the recent-files list.
+- **Go back or forward.** Use the back/forward buttons at the top of the new
+  tab. After pressing back through several notes lands you here, the forward
+  button takes you back to where you were. Hide them in settings if you prefer.
 - **Create a note from a new tab.** Press **Ctrl/Cmd + N** (or run *Create new
   note*) while a New Tab is focused — the new note opens *in that tab* instead
   of beside it.

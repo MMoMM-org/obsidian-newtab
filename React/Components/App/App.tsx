@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useObsidian } from "../../Context/ObsidianAppContext";
-import { TFile, setIcon } from "obsidian";
+import { TFile, WorkspaceLeaf, setIcon } from "obsidian";
+import { appInternals, getLeafHistory } from "src/Types/ObsidianInternals";
 import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
 import NewTabPlugin from "main";
@@ -35,9 +36,11 @@ const Icon = ({ name }: { name: string }) => {
 const App = ({
 	settingsObservable,
 	plugin,
+	leaf,
 }: {
 	settingsObservable: Observable<NewTabPluginSettings>;
 	plugin: NewTabPlugin;
+	leaf: WorkspaceLeaf;
 }) => {
 	const [quote, setQuote] = useState<Quote | null>(null);
 	const [settings, setSettings] = useState<NewTabPluginSettings>(
@@ -47,6 +50,27 @@ const App = ({
 	const mainDivRef = useRef<HTMLDivElement>(null);
 
 	const obsidian = useObsidian();
+
+	// This leaf's back/forward navigation stacks (internal API). Null when the
+	// build doesn't expose it — in that case the buttons are hidden entirely
+	// rather than rendered inert. Read once: the view re-mounts whenever the user
+	// lands back on the new tab, so the stack lengths are re-evaluated each time.
+	const history = useMemo(() => getLeafHistory(leaf), [leaf]);
+	const canGoBack = (history?.backHistory.length ?? 0) > 0;
+	const canGoForward = (history?.forwardHistory.length ?? 0) > 0;
+
+	// Navigate this leaf's history. Calling history.back()/forward() directly
+	// was unreliable, so make the leaf active and run Obsidian's own core
+	// navigation command — the exact path the keyboard shortcut / menu uses.
+	const navigate = (command: "app:go-back" | "app:go-forward") => {
+		if (!obsidian) {
+			return;
+		}
+		// Make this leaf active so the core navigation command targets it, then
+		// run Obsidian's own command — the exact path the keyboard shortcut uses.
+		obsidian.workspace.setActiveLeaf(leaf, { focus: true });
+		appInternals(obsidian).commands.executeCommandById(command);
+	};
 
 	// Local backgrounds live in the configured vault folder; resolve them to
 	// app:// resource URLs the browser can render.
@@ -284,6 +308,28 @@ const App = ({
 							</span>
 							<Icon name="search" />
 						</a>
+					)}
+					{settings.showNavButtons && history && (
+						<div className="newtab-nav">
+							<button
+								type="button"
+								className="newtab-iconbutton newtab-nav-button"
+								aria-label="Go back"
+								disabled={!canGoBack}
+								onClick={() => navigate("app:go-back")}
+							>
+								<Icon name="arrow-left" />
+							</button>
+							<button
+								type="button"
+								className="newtab-iconbutton newtab-nav-button"
+								aria-label="Go forward"
+								disabled={!canGoForward}
+								onClick={() => navigate("app:go-forward")}
+							>
+								<Icon name="arrow-right" />
+							</button>
+						</div>
 					)}
 				</div>
 				<div className="newtab-center">

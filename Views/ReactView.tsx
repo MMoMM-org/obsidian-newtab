@@ -60,6 +60,7 @@ export class ReactView extends FileView {
 				<ReactApp
 					settingsObservable={this.settingsObservable}
 					plugin={this.plugin}
+					leaf={this.leaf}
 				/>
 			</ObsidianContext.Provider>
 		);
