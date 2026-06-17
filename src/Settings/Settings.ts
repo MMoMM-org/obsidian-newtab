@@ -71,6 +71,12 @@ export interface NewTabPluginSettings {
 	localBackgroundFolder: string;
 	showTopLeftSearchButton: boolean;
 	topLeftSearchProvider: SearchProvider;
+	/**
+	 * Show back/forward navigation buttons on the new tab. Useful because landing
+	 * on the new tab via "go back" otherwise leaves no visible way to navigate
+	 * forward again (#78).
+	 */
+	showNavButtons: boolean;
 	showTime: boolean;
 	timeFormat: TIME_FORMAT;
 	showGreeting: boolean;
@@ -115,6 +121,7 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	localBackgroundFolder: "",
 	showTopLeftSearchButton: true,
 	topLeftSearchProvider: DEFAULT_SEARCH_PROVIDER,
+	showNavButtons: true,
 	showTime: true,
 	timeFormat: TIME_FORMAT.TWELVE_HOUR,
 	showGreeting: true,
@@ -546,6 +553,23 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			topLeftSearchProviderSetting,
 			this.plugin.settings.topLeftSearchProvider.display
 		);
+
+		new Setting(containerEl)
+			.setName("Show navigation buttons")
+			.setDesc(
+				`Should back and forward navigation buttons be shown at the top of the new tab screen? Helpful for navigating forward again after pressing back lands you here.`
+			)
+			.addToggle((component) => {
+				component.setValue(this.plugin.settings.showNavButtons);
+				component.onChange((value) => {
+					this.plugin.settings.showNavButtons = value;
+					this.plugin.settingsObservable.setValue(
+						this.plugin.settings
+					);
+					void this.plugin.saveSettings();
+					this.render();
+				});
+			});
 
 		new Setting(containerEl)
 			.setName("Show inline search")

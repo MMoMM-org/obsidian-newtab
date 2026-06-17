@@ -46,6 +46,7 @@ related option is selected (noted in the description).
 |---|---|---|
 | Show top left search button | `true` | Show the search button at the top-left of the new tab. |
 | Top left search provider | `Obsidian Core Quick Switcher` | Which plugin handles search from the top-left button. Supports the core Quick Switcher, Omnisearch, Switcher++, and Another Quick Switcher. |
+| Show navigation buttons | `true` | Show back and forward buttons at the top of the new tab, so you can navigate forward again after pressing back lands you here. |
 | Show inline search | `true` | Show the inline search box in the middle of the new tab. |
 | Inline search provider | `Obsidian Core Quick Switcher` | Which plugin handles search from the inline box. |
 
