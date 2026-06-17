@@ -1,7 +1,7 @@
 {
 	"id": "newtab",
 	"name": "New Tab",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"minAppVersion": "1.11.4",
 	"description": "Creates a customizable new tab view with beautiful backgrounds, quotes, search, and more.",
 	"author": "Marcus Breiden",

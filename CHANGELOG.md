@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/MMoMM-org/obsidian-newtab/compare/1.1.1...1.2.0) (2026-06-17)
+
+
+### Features
+
+* **navigation:** add back/forward buttons to the new tab ([dc763d3](https://github.com/MMoMM-org/obsidian-newtab/commit/dc763d3e37f5d5efa63141c12f315abd982edaec)), closes [#78](https://github.com/MMoMM-org/obsidian-newtab/issues/78)
+
 ## [1.1.1](https://github.com/MMoMM-org/obsidian-newtab/compare/1.1.0...1.1.1) (2026-06-14)
 
 
