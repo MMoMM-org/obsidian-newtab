@@ -1,7 +1,8 @@
 @use "React/Components/App/App";
 @use "src/CustomQuotesModel/CustomQuotesModel";
 
-// Branded header at the top of the settings tab: name · version · author · docs.
+// Branded header at the top of the settings tab: name · version · author · docs,
+// with a curated tagline beneath.
 .newtab-settings-header {
 	margin-bottom: 1em;
 	padding-bottom: 0.75em;
@@ -18,8 +19,46 @@
 		opacity: 0.5;
 	}
 
+	.newtab-settings-header-tagline {
+		margin-top: 0.2em;
+		color: var(--text-muted);
+		font-style: italic;
+	}
+
 	a {
 		color: var(--text-accent);
+	}
+}
+
+// Settings tab bar: a wrapping row of buttons that swaps the content below.
+.newtab-tab-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: 1em;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+
+	.newtab-tab {
+		padding: 6px 12px;
+		border: none;
+		border-radius: var(--radius-s);
+		background: transparent;
+		box-shadow: none;
+		color: var(--text-muted);
+		font-size: var(--font-ui-small);
+		cursor: pointer;
+
+		&:hover {
+			background: var(--background-modifier-hover);
+			color: var(--text-normal);
+		}
+
+		&.is-active {
+			background: var(--background-modifier-hover);
+			color: var(--text-normal);
+			font-weight: var(--font-semibold);
+		}
 	}
 }
 
