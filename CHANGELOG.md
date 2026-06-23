@@ -1,3 +1,16 @@
+# [1.3.0](https://github.com/MMoMM-org/obsidian-newtab/compare/1.2.0...1.3.0) (2026-06-23)
+
+
+### Bug Fixes
+
+* **styles:** address style-editor feedback + greeting markdown ([218fc99](https://github.com/MMoMM-org/obsidian-newtab/commit/218fc997889e36c57cd1325d59b7197d50c69d15))
+
+
+### Features
+
+* **settings:** tabbed settings UI with per-tab style assignment ([7ece63a](https://github.com/MMoMM-org/obsidian-newtab/commit/7ece63a96ec58b8c198eafa62b5ed4696a228807))
+* **styles:** add customizable text styles for new-tab elements ([2db53f5](https://github.com/MMoMM-org/obsidian-newtab/commit/2db53f5fb8f8f6ee3cc9d0e912d9ae51a0a05c8b)), closes [#41](https://github.com/MMoMM-org/obsidian-newtab/issues/41)
+
 # [1.2.0](https://github.com/MMoMM-org/obsidian-newtab/compare/1.1.1...1.2.0) (2026-06-17)
 
 
