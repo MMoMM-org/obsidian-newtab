@@ -23,6 +23,8 @@ import {
 	QUOTE_SOURCE,
 	VAULT_QUOTE_SELECTION,
 	TIME_FORMAT,
+	FONT_WEIGHT,
+	STYLE_TARGET,
 } from "src/Types/Enums";
 import { FolderSuggest } from "src/Settings/FolderSuggest";
 import { BeautitabImportModal } from "src/Import/BeautitabImportModal";
@@ -30,7 +32,14 @@ import {
 	isBeautitabEnabled,
 	BEAUTITAB_CONFLICT_MESSAGE,
 } from "src/Import/Beautitab";
-import { CustomQuote, SearchProvider } from "src/Types/Interfaces";
+import { CustomQuote, SearchProvider, TextStyle } from "src/Types/Interfaces";
+import { FontSuggest } from "src/Settings/FontSuggest";
+import {
+	DEFAULT_TEXT_STYLE,
+	DEFAULT_TEXT_STYLE_ID,
+	STYLE_TARGET_LABELS,
+	defaultStyleAssignments,
+} from "src/Settings/textStyles";
 import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
 import { themeUsesUnsplash } from "src/Utils/themeUsesUnsplash";
 import { uniqueVaultPath } from "src/Utils/uniqueVaultPath";
@@ -111,7 +120,27 @@ export interface NewTabPluginSettings {
 	 * fallback button's visibility and permanently retires the prompt.
 	 */
 	beautitabImportCompleted: boolean;
+	/**
+	 * Reusable, named text styles. Always contains the built-in Default style
+	 * (id DEFAULT_TEXT_STYLE_ID) as its first entry; users add/remove their own.
+	 */
+	textStyles: TextStyle[];
+	/**
+	 * Which style (by id) each text element uses. A target pointing at a missing
+	 * id falls back to the Default style at resolve time, so deleting a style
+	 * can never break a target.
+	 */
+	styleAssignments: Record<STYLE_TARGET, string>;
 }
+
+/** Sentence-case labels for the font-weight dropdown. */
+const WEIGHT_LABELS: Record<FONT_WEIGHT, string> = {
+	[FONT_WEIGHT.INHERIT]: "Default",
+	[FONT_WEIGHT.NORMAL]: "Normal",
+	[FONT_WEIGHT.MEDIUM]: "Medium",
+	[FONT_WEIGHT.SEMIBOLD]: "Semibold",
+	[FONT_WEIGHT.BOLD]: "Bold",
+};
 
 export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	backgroundTheme: BackgroundTheme.SEASONS_AND_HOLIDAYS,
@@ -146,6 +175,8 @@ export const DEFAULT_SETTINGS: NewTabPluginSettings = {
 	debugLogging: false,
 	beautitabImportOffered: false,
 	beautitabImportCompleted: false,
+	textStyles: [{ ...DEFAULT_TEXT_STYLE }],
+	styleAssignments: defaultStyleAssignments(),
 };
 
 /**
@@ -172,6 +203,22 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 	plugin: NewTabPlugin;
 	/** React root for the branded header rendered at the top of the tab. */
 	private headerRoot: Root | null = null;
+	/** Id of the currently selected settings tab. */
+	private activeTab = "background";
+	/** Ids of style editors currently expanded (preserved across re-renders). */
+	private readonly expandedStyles = new Set<string>();
+	/** The settings tabs, in display order. */
+	private readonly tabs: ReadonlyArray<{ id: string; label: string }> = [
+		{ id: "background", label: "Background" },
+		{ id: "search", label: "Search" },
+		{ id: "time", label: "Time" },
+		{ id: "greeting", label: "Greeting" },
+		{ id: "recent", label: "Recent files" },
+		{ id: "bookmarks", label: "Bookmarks" },
+		{ id: "quote", label: "Quote" },
+		{ id: "styles", label: "Styles" },
+		{ id: "debug", label: "Debug" },
+	];
 
 	constructor(app: App, plugin: NewTabPlugin) {
 		super(app, plugin);
@@ -345,6 +392,275 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 	}
 
+	/**
+	 * Persist a change to the text styles and push it to the live view. The
+	 * style arrays/objects are replaced with fresh references (not mutated in
+	 * place) so the React view's memoised style resolution actually recomputes.
+	 */
+	private commitStyleChange(): void {
+		// New array/object *references* so the React view's memoised style
+		// resolution recomputes — but the style objects themselves keep their
+		// identity. The editor closures hold references to those objects, so
+		// cloning them here would orphan an in-progress edit (the symptom being
+		// a name or font that appears not to save after the first change).
+		this.plugin.settings.textStyles = [...this.plugin.settings.textStyles];
+		this.plugin.settings.styleAssignments = {
+			...this.plugin.settings.styleAssignments,
+		};
+		this.plugin.settingsObservable.setValue(this.plugin.settings);
+		void this.plugin.saveSettings();
+	}
+
+	/** An id not already used by an existing style (e.g. "style-1", "style-2"). */
+	private nextStyleId(): string {
+		const used = new Set(
+			this.plugin.settings.textStyles.map((style) => style.id)
+		);
+		let n = this.plugin.settings.textStyles.length;
+		let id = `style-${n}`;
+		while (used.has(id)) {
+			n += 1;
+			id = `style-${n}`;
+		}
+		return id;
+	}
+
+	/** Append a new style (a copy of Default) and re-render the tab. */
+	private addStyle(): void {
+		const count = this.plugin.settings.textStyles.length;
+		const id = this.nextStyleId();
+		this.plugin.settings.textStyles.push({
+			...DEFAULT_TEXT_STYLE,
+			id,
+			name: `Style ${count}`,
+		});
+		// Open the new style straight away so it's ready to edit.
+		this.expandedStyles.add(id);
+		this.commitStyleChange();
+		this.render();
+	}
+
+	/**
+	 * Remove a style and point any element using it back at Default, so a
+	 * deletion can never leave a target referencing a missing style.
+	 */
+	private deleteStyle(id: string): void {
+		if (id === DEFAULT_TEXT_STYLE_ID) {
+			return;
+		}
+		this.plugin.settings.textStyles =
+			this.plugin.settings.textStyles.filter((style) => style.id !== id);
+		const assignments = this.plugin.settings.styleAssignments;
+		for (const target of Object.values(STYLE_TARGET)) {
+			if (assignments[target] === id) {
+				assignments[target] = DEFAULT_TEXT_STYLE_ID;
+			}
+		}
+		this.commitStyleChange();
+		this.render();
+	}
+
+	/** Reset the built-in Default style back to its neutral baseline. */
+	private resetDefaultStyle(): void {
+		const def = this.plugin.settings.textStyles.find(
+			(style) => style.id === DEFAULT_TEXT_STYLE_ID
+		);
+		if (def) {
+			Object.assign(def, DEFAULT_TEXT_STYLE);
+		}
+		this.commitStyleChange();
+		this.render();
+	}
+
+	/** Render the editor controls for one style, inside a collapsible block. */
+	private renderStyleEditor(containerEl: HTMLElement, style: TextStyle): void {
+		const isDefault = style.id === DEFAULT_TEXT_STYLE_ID;
+
+		// Each style is a collapsible <details> so the editors don't dominate the
+		// tab; open/closed state is remembered across re-renders. To revert to
+		// the always-open layout, render the rows straight into `containerEl`.
+		const details = containerEl.createEl("details", { cls: "newtab-style" });
+		details.open = this.expandedStyles.has(style.id);
+		details.addEventListener("toggle", () => {
+			if (details.open) {
+				this.expandedStyles.add(style.id);
+			} else {
+				this.expandedStyles.delete(style.id);
+			}
+		});
+		const summary = details.createEl("summary", {
+			cls: "newtab-style-summary",
+		});
+		summary.createSpan({
+			cls: "newtab-style-summary-name",
+			text: style.name,
+		});
+
+		if (isDefault) {
+			new Setting(details)
+				.setName("Default style")
+				.setDesc(
+					"The baseline style — leave it unchanged to keep the original look, or edit it to restyle everything at once."
+				)
+				.addExtraButton((button) => {
+					button
+						.setIcon("rotate-ccw")
+						.setTooltip("Reset the default style");
+					button.onClick(() => this.resetDefaultStyle());
+				});
+		} else {
+			new Setting(details)
+				.setName("Name")
+				.addText((text) => {
+					text.setValue(style.name);
+					// Track the name at focus so we only re-render (to refresh the
+					// summary and assignment dropdowns) when it actually changed —
+					// re-rendering on every blur would be disruptive.
+					let nameAtFocus = style.name;
+					text.onChange((value) => {
+						style.name = value;
+						this.commitStyleChange();
+					});
+					text.inputEl.addEventListener("focus", () => {
+						nameAtFocus = style.name;
+					});
+					text.inputEl.addEventListener("blur", () => {
+						if (style.name !== nameAtFocus) {
+							this.render();
+						}
+					});
+				})
+				.addExtraButton((button) => {
+					button.setIcon("trash").setTooltip("Delete style");
+					button.onClick(() => this.deleteStyle(style.id));
+				});
+		}
+
+		new Setting(details)
+			.setName("Font")
+			.setDesc(
+				"Type a font family, or start typing to pick from your installed fonts (desktop). Leave empty for the theme font."
+			)
+			.addText((text) => {
+				text.setPlaceholder("Theme default");
+				text.setValue(style.fontFamily);
+				new FontSuggest(this.app, text.inputEl, (font) => {
+					style.fontFamily = font;
+					this.commitStyleChange();
+				});
+				text.onChange((value) => {
+					style.fontFamily = value;
+					this.commitStyleChange();
+				});
+			});
+
+		const sizeSetting = new Setting(details)
+			.setName("Size")
+			.setDesc("Percentage of the element's default size.");
+		sizeSetting.addSlider((slider) => {
+			slider.setLimits(50, 300, 5);
+			slider.setValue(
+				Math.min(300, Math.max(50, style.sizePercent || 100))
+			);
+			slider.onChange((value) => {
+				style.sizePercent = value;
+				sizeValue.setText(`${value}%`);
+				this.commitStyleChange();
+			});
+		});
+		// A live read-out of the current percentage, since the slider's own
+		// (deprecated) dynamic tooltip only shows while dragging.
+		const sizeValue = sizeSetting.controlEl.createSpan({
+			cls: "newtab-style-size-value",
+			text: `${Math.round(style.sizePercent) || 100}%`,
+		});
+
+		new Setting(details).setName("Weight").addDropdown((dropdown) => {
+			for (const weight of Object.values(FONT_WEIGHT)) {
+				dropdown.addOption(weight, WEIGHT_LABELS[weight]);
+			}
+			dropdown.setValue(style.weight);
+			dropdown.onChange((value) => {
+				style.weight = value as FONT_WEIGHT;
+				this.commitStyleChange();
+			});
+		});
+
+		new Setting(details).setName("Italic").addToggle((toggle) => {
+			toggle.setValue(style.italic);
+			toggle.onChange((value) => {
+				style.italic = value;
+				this.commitStyleChange();
+			});
+		});
+
+		new Setting(details)
+			.setName("Color")
+			.setDesc("Reset to inherit the theme's text color.")
+			.addColorPicker((picker) => {
+				// "" means inherit; show the current default colour as a starting
+				// point without persisting it until the user actually picks one.
+				picker.setValue(style.color || "#dadada");
+				picker.onChange((value) => {
+					style.color = value;
+					this.commitStyleChange();
+				});
+			})
+			.addExtraButton((button) => {
+				button
+					.setIcon("rotate-ccw")
+					.setTooltip("Reset to theme color");
+				button.onClick(() => {
+					style.color = "";
+					this.commitStyleChange();
+					this.render();
+				});
+			});
+	}
+
+	/**
+	 * Render the "applied style" dropdown for a single element, shown at the
+	 * bottom of that element's own tab. Styles themselves are created/edited on
+	 * the Styles tab; here you just pick which one this element uses.
+	 */
+	private renderAppliedStyle(
+		containerEl: HTMLElement,
+		target: STYLE_TARGET
+	): void {
+		new Setting(containerEl).setHeading().setName("Text style");
+		new Setting(containerEl)
+			.setName(`${STYLE_TARGET_LABELS[target]} style`)
+			.setDesc(
+				"Which text style this element uses. Add or edit styles on the styles tab."
+			)
+			.addDropdown((dropdown) => {
+				for (const style of this.plugin.settings.textStyles) {
+					dropdown.addOption(style.id, style.name);
+				}
+				dropdown.setValue(this.plugin.settings.styleAssignments[target]);
+				dropdown.onChange((value) => {
+					this.plugin.settings.styleAssignments[target] = value;
+					this.commitStyleChange();
+				});
+			});
+	}
+
+	/** The Styles tab: define/edit reusable text styles (no assignments here). */
+	private renderStylesTab(containerEl: HTMLElement): void {
+		new Setting(containerEl)
+			.setName("Styles")
+			.setDesc(
+				"Reusable text styles you can assign to each element from its own tab. Add as many as you like; the default style keeps the original look."
+			)
+			.addButton((button) => {
+				button.setButtonText("Add style").setCta();
+				button.onClick(() => this.addStyle());
+			});
+		for (const style of this.plugin.settings.textStyles) {
+			this.renderStyleEditor(containerEl, style);
+		}
+	}
+
 	display(): void {
 		this.render();
 	}
@@ -365,11 +681,67 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 
 		this.renderBeautitabImport(containerEl);
 
-		/****************************************
-		 * Background settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Background settings`);
+		const tabBar = containerEl.createDiv({ cls: "newtab-tab-bar" });
+		tabBar.setAttribute("role", "tablist");
+		for (const tab of this.tabs) {
+			this.addTab(tabBar, tab.id, tab.label);
+		}
 
+		const content = containerEl.createDiv({ cls: "newtab-tab-content" });
+		this.renderActiveTab(content);
+	}
+
+	/** Render one tab button into the tab bar. */
+	private addTab(tabBar: HTMLElement, id: string, label: string): void {
+		const isActive = id === this.activeTab;
+		const button = tabBar.createEl("button", {
+			cls: `newtab-tab${isActive ? " is-active" : ""}`,
+			text: label,
+		});
+		button.setAttribute("role", "tab");
+		button.setAttribute("aria-selected", String(isActive));
+		button.addEventListener("click", () => {
+			this.activeTab = id;
+			this.render();
+		});
+	}
+
+	/** Dispatch to the active tab's renderer. */
+	private renderActiveTab(containerEl: HTMLElement): void {
+		switch (this.activeTab) {
+			case "search":
+				this.renderSearchTab(containerEl);
+				break;
+			case "time":
+				this.renderTimeTab(containerEl);
+				break;
+			case "greeting":
+				this.renderGreetingTab(containerEl);
+				break;
+			case "recent":
+				this.renderRecentFilesTab(containerEl);
+				break;
+			case "bookmarks":
+				this.renderBookmarksTab(containerEl);
+				break;
+			case "quote":
+				this.renderQuoteTab(containerEl);
+				break;
+			case "styles":
+				this.renderStylesTab(containerEl);
+				break;
+			case "debug":
+				this.renderDebugTab(containerEl);
+				break;
+			case "background":
+			default:
+				this.renderBackgroundTab(containerEl);
+				break;
+		}
+	}
+
+	/** Background tab: theme, Unsplash key, custom sources, local images. */
+	private renderBackgroundTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Background theme")
 			.setDesc(
@@ -501,11 +873,10 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		/****************************************
-		 * Search settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Search settings`);
+	}
 
+	/** Search tab: top-left button, providers, nav buttons, inline search. */
+	private renderSearchTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Show top left search button")
 			.setDesc(
@@ -617,11 +988,11 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			this.plugin.settings.inlineSearchProvider.display
 		);
 
-		/****************************************
-		 * Time settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Time settings`);
+		this.renderAppliedStyle(containerEl, STYLE_TARGET.SEARCH);
+	}
 
+	/** Time tab: visibility and 12/24-hour format. */
+	private renderTimeTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Show time")
 			.setDesc(
@@ -664,11 +1035,11 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		/****************************************
-		 * Greeting settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Greeting settings`);
+		this.renderAppliedStyle(containerEl, STYLE_TARGET.TIME);
+	}
 
+	/** Greeting tab: visibility, text (markdown), language. */
+	private renderGreetingTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Show greeting")
 			.setDesc(
@@ -689,7 +1060,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Greeting text")
 			.setDesc(
-				`What text should be displayed as a greeting? You can use the {{greeting}} to add a greeting based on the time of the day. (E.g. Good morning)`
+				`What text should be displayed as a greeting? Use {{greeting}} for a time-of-day greeting (e.g. Good morning), and markdown like **bold** or *italic* for emphasis.`
 			)
 			.addText((component) => {
 				component.setValue(this.plugin.settings.greetingText);
@@ -727,11 +1098,11 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		/****************************************
-		 * Recent file settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Recent file settings`);
+		this.renderAppliedStyle(containerEl, STYLE_TARGET.GREETING);
+	}
 
+	/** Recent files tab. */
+	private renderRecentFilesTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Show recent files")
 			.setDesc(
@@ -749,11 +1120,11 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		/****************************************
-		 * Bookmark settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Bookmark settings`);
+		this.renderAppliedStyle(containerEl, STYLE_TARGET.RECENT_FILES);
+	}
 
+	/** Bookmarks tab: visibility and source group. */
+	private renderBookmarksTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Show bookmarks")
 			.setDesc(
@@ -815,11 +1186,11 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 		}
 
-		/****************************************
-		 * Quote settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Quote settings`);
+		this.renderAppliedStyle(containerEl, STYLE_TARGET.BOOKMARKS);
+	}
 
+	/** Quote tab: visibility and the three quote sources. */
+	private renderQuoteTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Show quote")
 			.setDesc(
@@ -989,11 +1360,11 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 		}
 
-		/****************************************
-		 * Debug settings
-		 ***************************************/
-		new Setting(containerEl).setHeading().setName(`Debug settings`);
+		this.renderAppliedStyle(containerEl, STYLE_TARGET.QUOTE);
+	}
 
+	/** Debug tab: developer-console logging toggle. */
+	private renderDebugTab(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Debug logging")
 			.setDesc(

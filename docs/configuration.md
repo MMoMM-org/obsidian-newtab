@@ -1,18 +1,21 @@
 # Configuration
 
-All settings for New Tab live in one place and apply immediately as you change
-them.
+All settings for New Tab live in the plugin's settings tab and apply immediately
+as you change them. They're organized into tabs — one per element
+(**Background**, **Search**, **Time**, **Greeting**, **Recent files**,
+**Bookmarks**, **Quote**), plus **Styles** and **Debug**.
 
 ## How to open settings
 
 Open **Settings → Community plugins → New Tab** (gear icon), or **Settings → New
-tab** in the left settings sidebar. Changes take effect at once — open a new tab
-to see them.
+tab** in the left settings sidebar. Pick a tab along the top; changes take effect
+at once — open a new tab to see them.
 
 ## Settings reference
 
 Some rows are **conditional** — they only appear in the settings panel when a
-related option is selected (noted in the description).
+related option is selected (noted in the description). Each element's tab also
+ends with an **applied style** dropdown — see [Text styles](#styles).
 
 ### Background
 
@@ -39,7 +42,7 @@ related option is selected (noted in the description).
 ### Search
 
 <p align="center">
-  <img src="../assets/settings-search-time.png" alt="The search and time settings" />
+  <img src="../assets/settings-search.png" alt="The Search settings tab" />
 </p>
 
 | Setting | Default | Description |
@@ -52,6 +55,10 @@ related option is selected (noted in the description).
 
 ### Time
 
+<p align="center">
+  <img src="../assets/settings-time.png" alt="The Time settings tab" />
+</p>
+
 | Setting | Default | Description |
 |---|---|---|
 | Show time | `true` | Show the clock in the middle of the new tab. |
@@ -62,16 +69,20 @@ related option is selected (noted in the description).
 ### Greeting
 
 <p align="center">
-  <img src="../assets/settings-greeting-recent.png" alt="The greeting and recent-files settings" />
+  <img src="../assets/settings-greeting.png" alt="The Greeting settings tab" />
 </p>
 
 | Setting | Default | Description |
 |---|---|---|
 | Show greeting | `true` | Show the greeting in the middle of the new tab. |
-| Greeting text | `Hello, Beautiful.` | The greeting text. Use the `{{greeting}}` token to insert a time-of-day greeting (e.g. "Good morning"). |
+| Greeting text | `Hello, Beautiful.` | The greeting text. Use the `{{greeting}}` token to insert a time-of-day greeting (e.g. "Good morning"), and markdown like `**bold**` or `*italic*` for emphasis. |
 | Greeting language | `Auto (follow Obsidian)` | Language for the `{{greeting}}` phrase. "Auto" follows Obsidian's display language; pick a specific language to greet in a different one. |
 
 ### Recent files
+
+<p align="center">
+  <img src="../assets/settings-recentfiles.png" alt="The Recent files settings tab" />
+</p>
 
 | Setting | Default | Description |
 |---|---|---|
@@ -79,6 +90,10 @@ related option is selected (noted in the description).
 
 
 ### Bookmarks
+
+<p align="center">
+  <img src="../assets/settings-bookmarks.png" alt="The Bookmarks settings tab" />
+</p>
 
 | Setting | Default | Description |
 |---|---|---|
@@ -89,7 +104,7 @@ related option is selected (noted in the description).
 ### Quote
 
 <p align="center">
-  <img src="../assets/settings-quote-debug.png" alt="The quote and debug settings" />
+  <img src="../assets/settings-quote.png" alt="The Quote settings tab" />
 </p>
 
 | Setting | Default | Description |
@@ -107,7 +122,39 @@ related option is selected (noted in the description).
 > Quotes are drawn from the **union** of whichever sources are enabled. If a
 > source fails (e.g. offline ZenQuotes), the plugin falls back to the others.
 
+### Styles
+
+The **Styles** tab is where you create reusable *text styles* and the rest of
+the tabs decide which style each element uses.
+
+<p align="center">
+  <img src="../assets/settings-styles.png" alt="The Styles settings tab, with the collapsible style editors" />
+</p>
+
+A **text style** bundles five properties; each has a neutral value that leaves
+the current look untouched, so the built-in **Default** style reproduces the
+original appearance exactly:
+
+| Property | Default | Description |
+|---|---|---|
+| Font | _(theme font)_ | A font family. Type any installed font, or start typing to pick from your system fonts with a live preview (desktop; free-text on mobile). Empty inherits the theme font. |
+| Size | `100%` | A percentage of the element's normal size, so each element scales from its own baseline (the quote keeps its line proportions). |
+| Weight | `Default` | Normal, Medium, Semibold, or Bold. "Default" keeps the element's built-in weight. |
+| Italic | `false` | Render the text in italics. |
+| Color | _(inherit)_ | A text color, or reset to inherit the theme's color. |
+
+- **Add style** creates a new style; each style is a collapsible block. The
+  **Default** style can't be deleted, but it has a reset button — and editing it
+  is a quick way to restyle every element at once.
+- To apply a style, open the element's own tab (Time, Greeting, …) and pick it
+  in that tab's **applied style** dropdown. Deleting a style returns anything
+  using it to Default.
+
 ### Debug
+
+<p align="center">
+  <img src="../assets/settings-debug.png" alt="The Debug settings tab" />
+</p>
 
 | Setting | Default | Description |
 |---|---|---|

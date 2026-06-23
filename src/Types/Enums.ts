@@ -41,3 +41,31 @@ export enum VAULT_QUOTE_SELECTION {
 	TAG = "tag",
 	PATH = "path",
 }
+
+/**
+ * Font weight options for a text style. INHERIT means "don't override" — the
+ * element keeps whatever weight the stylesheet already gives it, which is how
+ * the built-in Default style preserves the current look (e.g. the quote's 500).
+ * The other values are CSS font-weight numbers.
+ */
+export enum FONT_WEIGHT {
+	INHERIT = "",
+	NORMAL = "400",
+	MEDIUM = "500",
+	SEMIBOLD = "600",
+	BOLD = "700",
+}
+
+/**
+ * The text elements a style can be assigned to. Each value matches the
+ * NewTabPluginSettings.styleAssignments key and is used to resolve the CSS
+ * variables applied to that element's container in the view.
+ */
+export enum STYLE_TARGET {
+	TIME = "time",
+	GREETING = "greeting",
+	RECENT_FILES = "recentFiles",
+	BOOKMARKS = "bookmarks",
+	SEARCH = "search",
+	QUOTE = "quote",
+}

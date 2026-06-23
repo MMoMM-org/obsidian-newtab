@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useObsidian } from "../../Context/ObsidianAppContext";
-import { TFile, WorkspaceLeaf, setIcon } from "obsidian";
+import {
+	Component,
+	MarkdownRenderer,
+	TFile,
+	WorkspaceLeaf,
+	setIcon,
+} from "obsidian";
 import { appInternals, getLeafHistory } from "src/Types/ObsidianInternals";
 import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
@@ -13,7 +19,8 @@ import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
 import getQuote, { Quote } from "React/Utils/getQuote";
 import { getVaultQuotes } from "React/Utils/getVaultQuotes";
-import { BackgroundTheme } from "src/Types/Enums";
+import { BackgroundTheme, STYLE_TARGET } from "src/Types/Enums";
+import { resolveAllStyleVars } from "React/Utils/resolveTextStyles";
 import { debugLog } from "React/Utils/debug";
 
 /**
@@ -31,6 +38,37 @@ const Icon = ({ name }: { name: string }) => {
 	}, [name]);
 
 	return <span className="newtab-icon" ref={ref}></span>;
+};
+
+/**
+ * Render a short markdown string inline (used for the greeting, so `**bold**`,
+ * `*italic*`, etc. work). Uses Obsidian's own MarkdownRenderer rather than
+ * injecting HTML, so it's XSS-safe and matches the app's markdown. The
+ * throwaway Component owns any child lifecycles and is unloaded on cleanup.
+ */
+const MarkdownInline = ({ markdown }: { markdown: string }) => {
+	const ref = useRef<HTMLSpanElement>(null);
+	const obsidian = useObsidian();
+
+	useEffect(() => {
+		const el = ref.current;
+		if (!el) {
+			return;
+		}
+		el.empty();
+		if (!obsidian) {
+			el.setText(markdown);
+			return;
+		}
+		const component = new Component();
+		component.load();
+		void MarkdownRenderer.render(obsidian, markdown, el, "", component);
+		return () => {
+			component.unload();
+		};
+	}, [markdown, obsidian]);
+
+	return <span className="newtab-greeting-md" ref={ref}></span>;
 };
 
 const App = ({
@@ -156,6 +194,18 @@ const App = ({
 	const bookmarks = useMemo(
 		() => getBookmarks(obsidian, settings).slice(0, 5),
 		[obsidian, settings]
+	);
+
+	// Resolve each text element's assigned style into the CSS variables applied
+	// to its container; App.scss reads them with the element's base value as the
+	// fallback, so the Default style renders exactly as before.
+	const styleVars = useMemo(
+		() =>
+			resolveAllStyleVars(
+				settings.textStyles,
+				settings.styleAssignments
+			),
+		[settings.textStyles, settings.styleAssignments]
 	);
 
 	/**
@@ -334,18 +384,28 @@ const App = ({
 				</div>
 				<div className="newtab-center">
 					{settings.showTime && (
-						<div className="newtab-time">{time}</div>
+						<div
+							className="newtab-time"
+							style={styleVars[STYLE_TARGET.TIME]}
+						>
+							{time}
+						</div>
 					)}
 					{settings.showGreeting && (
-						<div className="newtab-greeting">
-							{settings.greetingText.replace(
-								/{{greeting}}/gi,
-								getTimeOfDayGreeting(
-									resolveGreetingLocale(
-										settings.greetingLanguage
+						<div
+							className="newtab-greeting"
+							style={styleVars[STYLE_TARGET.GREETING]}
+						>
+							<MarkdownInline
+								markdown={settings.greetingText.replace(
+									/{{greeting}}/gi,
+									getTimeOfDayGreeting(
+										resolveGreetingLocale(
+											settings.greetingLanguage
+										)
 									)
-								)
-							)}
+								)}
+							/>
 						</div>
 					)}
 				</div>
@@ -354,6 +414,7 @@ const App = ({
 						{settings.showInlineSearch && (
 							<a
 								className="newtab-search-wrapper"
+								style={styleVars[STYLE_TARGET.SEARCH]}
 								onClick={() => {
 									plugin.openSwitcherCommand(
 										settings.inlineSearchProvider.command
@@ -368,7 +429,10 @@ const App = ({
 						)}
 					</div>
 					{settings.showRecentFiles && (
-						<div className="newtab-recentlyedited">
+						<div
+							className="newtab-recentlyedited"
+							style={styleVars[STYLE_TARGET.RECENT_FILES]}
+						>
 							{recentFiles.map(
 								(file) =>
 									file instanceof TFile && (
@@ -395,7 +459,10 @@ const App = ({
 						</div>
 					)}
 					{settings.showBookmarks && (
-						<div className="newtab-recentlyedited">
+						<div
+							className="newtab-recentlyedited"
+							style={styleVars[STYLE_TARGET.BOOKMARKS]}
+						>
 							{bookmarks?.map(
 								(file: TFile) =>
 									file && (
@@ -422,8 +489,11 @@ const App = ({
 						</div>
 					)}
 				</div>
-				<div className="newtab-quote">
-					{quote?.content && settings.showQuote && (
+				<div
+						className="newtab-quote"
+						style={styleVars[STYLE_TARGET.QUOTE]}
+					>
+						{quote?.content && settings.showQuote && (
 						<div className="newtab-quote-content">
 							{quote.sourcePath ? (
 								<a
