@@ -17,15 +17,18 @@ a quote, quick search, bookmarks, and recently edited files.
 - **Backgrounds** — seasonal/holiday themes via Unsplash, your own local images,
   a custom URL, or transparent modes.
 - **Clock** — 12- or 24-hour.
-- **Greeting** — customizable and time-of-day aware, in 10 languages out of the
-  box: English, Deutsch, Español, Français, Português, Italiano, Nederlands,
-  Русский, 中文 (简体), and 日本語.
+- **Greeting** — customizable and time-of-day aware, with markdown (`**bold**`,
+  `*italic*`) support, in 10 languages out of the box: English, Deutsch, Español,
+  Français, Português, Italiano, Nederlands, Русский, 中文 (简体), and 日本語.
 - **Quote** — built-in online quotes (ZenQuotes) or your own custom quotes.
 - **Search** — a top-left search button and an inline search box, each wired to a
   search provider of your choice.
 - **Bookmarks** — from all groups or a specific group.
 - **Recent files** — the five most recently edited notes.
-- Every element is individually toggleable from the settings tab.
+- **Text styles** — give each element its own font, size, weight, italic, and
+  color through reusable styles, with a system-font picker on desktop.
+- Every element is individually toggleable and styleable from the settings tab,
+  which is organized into a tab per element.
 
 ## Install
 
