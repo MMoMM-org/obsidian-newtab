@@ -13,7 +13,8 @@ import { getBookmarks } from "React/Utils/getBookmarks";
 import { NewTabPluginSettings } from "src/Settings/Settings";
 import getQuote, { Quote } from "React/Utils/getQuote";
 import { getVaultQuotes } from "React/Utils/getVaultQuotes";
-import { BackgroundTheme } from "src/Types/Enums";
+import { BackgroundTheme, STYLE_TARGET } from "src/Types/Enums";
+import { resolveAllStyleVars } from "React/Utils/resolveTextStyles";
 import { debugLog } from "React/Utils/debug";
 
 /**
@@ -156,6 +157,18 @@ const App = ({
 	const bookmarks = useMemo(
 		() => getBookmarks(obsidian, settings).slice(0, 5),
 		[obsidian, settings]
+	);
+
+	// Resolve each text element's assigned style into the CSS variables applied
+	// to its container; App.scss reads them with the element's base value as the
+	// fallback, so the Default style renders exactly as before.
+	const styleVars = useMemo(
+		() =>
+			resolveAllStyleVars(
+				settings.textStyles,
+				settings.styleAssignments
+			),
+		[settings.textStyles, settings.styleAssignments]
 	);
 
 	/**
@@ -334,10 +347,18 @@ const App = ({
 				</div>
 				<div className="newtab-center">
 					{settings.showTime && (
-						<div className="newtab-time">{time}</div>
+						<div
+							className="newtab-time"
+							style={styleVars[STYLE_TARGET.TIME]}
+						>
+							{time}
+						</div>
 					)}
 					{settings.showGreeting && (
-						<div className="newtab-greeting">
+						<div
+							className="newtab-greeting"
+							style={styleVars[STYLE_TARGET.GREETING]}
+						>
 							{settings.greetingText.replace(
 								/{{greeting}}/gi,
 								getTimeOfDayGreeting(
@@ -354,6 +375,7 @@ const App = ({
 						{settings.showInlineSearch && (
 							<a
 								className="newtab-search-wrapper"
+								style={styleVars[STYLE_TARGET.SEARCH]}
 								onClick={() => {
 									plugin.openSwitcherCommand(
 										settings.inlineSearchProvider.command
@@ -368,7 +390,10 @@ const App = ({
 						)}
 					</div>
 					{settings.showRecentFiles && (
-						<div className="newtab-recentlyedited">
+						<div
+							className="newtab-recentlyedited"
+							style={styleVars[STYLE_TARGET.RECENT_FILES]}
+						>
 							{recentFiles.map(
 								(file) =>
 									file instanceof TFile && (
@@ -395,7 +420,10 @@ const App = ({
 						</div>
 					)}
 					{settings.showBookmarks && (
-						<div className="newtab-recentlyedited">
+						<div
+							className="newtab-recentlyedited"
+							style={styleVars[STYLE_TARGET.BOOKMARKS]}
+						>
 							{bookmarks?.map(
 								(file: TFile) =>
 									file && (
@@ -422,8 +450,11 @@ const App = ({
 						</div>
 					)}
 				</div>
-				<div className="newtab-quote">
-					{quote?.content && settings.showQuote && (
+				<div
+						className="newtab-quote"
+						style={styleVars[STYLE_TARGET.QUOTE]}
+					>
+						{quote?.content && settings.showQuote && (
 						<div className="newtab-quote-content">
 							{quote.sourcePath ? (
 								<a

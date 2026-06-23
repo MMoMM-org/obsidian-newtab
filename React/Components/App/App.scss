@@ -159,19 +159,27 @@
 				padding-bottom: 20px;
 
 				.newtab-time {
-					font-size: 1050%;
+					font-size: calc(1050% * var(--nt-size-scale, 1));
 					line-height: 1;
+					font-family: var(--nt-font-family, inherit);
+					font-weight: var(--nt-font-weight, inherit);
+					font-style: var(--nt-font-style, normal);
+					color: var(--nt-color, inherit);
 
 					@container (max-width: 520px) {
-						font-size: 30cqw;
+						font-size: calc(30cqw * var(--nt-size-scale, 1));
 					}
 				}
 
 				.newtab-greeting {
-					font-size: 3rem;
+					font-size: calc(3rem * var(--nt-size-scale, 1));
+					font-family: var(--nt-font-family, inherit);
+					font-weight: var(--nt-font-weight, inherit);
+					font-style: var(--nt-font-style, normal);
+					color: var(--nt-color, inherit);
 
 					@container (max-width: 520px) {
-						font-size: 8cqw;
+						font-size: calc(8cqw * var(--nt-size-scale, 1));
 					}
 				}
 			}
@@ -203,12 +211,15 @@
 						box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
 						margin-bottom: 20px;
 						text-decoration: none;
-						color: inherit;
+						color: var(--nt-color, inherit);
 						line-height: 1;
 						padding-left: 20px;
+						font-family: var(--nt-font-family, inherit);
+						font-weight: var(--nt-font-weight, inherit);
+						font-style: var(--nt-font-style, normal);
 
 						.newtab-search-text {
-							font-size: 28px;
+							font-size: calc(28px * var(--nt-size-scale, 1));
 							opacity: 0.8;
 							padding-left: 20px;
 						}
@@ -228,13 +239,16 @@
 					width: 100%;
 
 					.newtab-recentlyedited-file {
-						color: inherit;
+						color: var(--nt-color, inherit);
 						text-decoration: none;
 						text-align: center;
 						padding: 10px;
 						white-space: nowrap;
 						overflow: hidden;
 						width: 100px;
+						font-family: var(--nt-font-family, inherit);
+						font-weight: var(--nt-font-weight, inherit);
+						font-style: var(--nt-font-style, normal);
 
 						&:hover {
 							backdrop-filter: blur(5px);
@@ -253,7 +267,7 @@
 
 						.newtab-recentlyedited-file-name {
 							display: block;
-							font-size: 12px;
+							font-size: calc(12px * var(--nt-size-scale, 1));
 							text-overflow: ellipsis;
 							overflow: hidden;
 						}
@@ -272,18 +286,25 @@
 					rgba(0, 0, 0, 0.6) 100%
 				);
 				text-align: center;
+				font-family: var(--nt-font-family, inherit);
+				font-style: var(--nt-font-style, normal);
+				color: var(--nt-color, inherit);
 
 				@container (max-width: 599px) {
 					padding-bottom: 80px;
 				}
 
+				// The three quote lines scale off one --nt-size-scale, so their
+				// relative proportions (content : author : attribution) are
+				// preserved whatever size the assigned style picks.
 				.newtab-quote-content {
-					font-size: 1.1rem;
-					font-weight: 500;
+					font-size: calc(1.1rem * var(--nt-size-scale, 1));
+					// Default keeps the original 500; an assigned weight overrides.
+					font-weight: var(--nt-font-weight, 500);
 					margin-bottom: 5px;
 
 					@container (max-width: 600px) {
-						font-size: 0.8rem;
+						font-size: calc(0.8rem * var(--nt-size-scale, 1));
 					}
 
 					// Quote sourced from a vault note — click to open it.
@@ -299,12 +320,13 @@
 				}
 
 				.newtab-quote-author {
-					font-size: 0.9rem;
+					font-size: calc(0.9rem * var(--nt-size-scale, 1));
+					font-weight: var(--nt-font-weight, inherit);
 					opacity: 0.7;
 				}
 
 				.newtab-quote-attribution {
-					font-size: 0.7rem;
+					font-size: calc(0.7rem * var(--nt-size-scale, 1));
 					opacity: 0.4;
 					margin-top: 4px;
 

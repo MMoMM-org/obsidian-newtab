@@ -14,6 +14,7 @@ import {
 	DEFAULT_SETTINGS,
 	migrateQuoteSources,
 } from "src/Settings/Settings";
+import { normalizeStyleSettings } from "src/Settings/textStyles";
 import { setDebugLogging, debugLog } from "React/Utils/debug";
 import {
 	readBeautitabData,
@@ -132,6 +133,7 @@ export default class NewTabPlugin extends Plugin {
 			{}) as Record<string, unknown>;
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 		migrateQuoteSources(this.settings, data);
+		normalizeStyleSettings(this.settings);
 	}
 
 	/**
