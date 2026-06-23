@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useObsidian } from "../../Context/ObsidianAppContext";
-import { TFile, WorkspaceLeaf, setIcon } from "obsidian";
+import {
+	Component,
+	MarkdownRenderer,
+	TFile,
+	WorkspaceLeaf,
+	setIcon,
+} from "obsidian";
 import { appInternals, getLeafHistory } from "src/Types/ObsidianInternals";
 import getTime from "React/Utils/getTime";
 import Observable from "src/Utils/Observable";
@@ -32,6 +38,37 @@ const Icon = ({ name }: { name: string }) => {
 	}, [name]);
 
 	return <span className="newtab-icon" ref={ref}></span>;
+};
+
+/**
+ * Render a short markdown string inline (used for the greeting, so `**bold**`,
+ * `*italic*`, etc. work). Uses Obsidian's own MarkdownRenderer rather than
+ * injecting HTML, so it's XSS-safe and matches the app's markdown. The
+ * throwaway Component owns any child lifecycles and is unloaded on cleanup.
+ */
+const MarkdownInline = ({ markdown }: { markdown: string }) => {
+	const ref = useRef<HTMLSpanElement>(null);
+	const obsidian = useObsidian();
+
+	useEffect(() => {
+		const el = ref.current;
+		if (!el) {
+			return;
+		}
+		el.empty();
+		if (!obsidian) {
+			el.setText(markdown);
+			return;
+		}
+		const component = new Component();
+		component.load();
+		void MarkdownRenderer.render(obsidian, markdown, el, "", component);
+		return () => {
+			component.unload();
+		};
+	}, [markdown, obsidian]);
+
+	return <span className="newtab-greeting-md" ref={ref}></span>;
 };
 
 const App = ({
@@ -359,14 +396,16 @@ const App = ({
 							className="newtab-greeting"
 							style={styleVars[STYLE_TARGET.GREETING]}
 						>
-							{settings.greetingText.replace(
-								/{{greeting}}/gi,
-								getTimeOfDayGreeting(
-									resolveGreetingLocale(
-										settings.greetingLanguage
+							<MarkdownInline
+								markdown={settings.greetingText.replace(
+									/{{greeting}}/gi,
+									getTimeOfDayGreeting(
+										resolveGreetingLocale(
+											settings.greetingLanguage
+										)
 									)
-								)
-							)}
+								)}
+							/>
 						</div>
 					)}
 				</div>

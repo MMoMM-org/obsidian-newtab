@@ -44,6 +44,14 @@
 	}
 }
 
+// Live percentage read-out shown next to the text-style size slider.
+.newtab-style-size-value {
+	margin-left: 0.6em;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	font-variant-numeric: tabular-nums;
+}
+
 // Search-provider settings: the selected provider sits on its own line under
 // the description (in the info block), so the long description can run almost
 // to the Change button without truncating the value.

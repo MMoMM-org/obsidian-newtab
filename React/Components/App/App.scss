@@ -181,6 +181,14 @@
 					@container (max-width: 520px) {
 						font-size: calc(8cqw * var(--nt-size-scale, 1));
 					}
+
+					// The greeting is rendered via Obsidian's MarkdownRenderer so
+					// **bold** / *italic* work; it wraps the text in a block <p>,
+					// so flatten that back to inline with no stray margins.
+					.newtab-greeting-md p {
+						display: inline;
+						margin: 0;
+					}
 				}
 			}
 

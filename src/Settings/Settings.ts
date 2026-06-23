@@ -382,9 +382,12 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 	 * place) so the React view's memoised style resolution actually recomputes.
 	 */
 	private commitStyleChange(): void {
-		this.plugin.settings.textStyles = this.plugin.settings.textStyles.map(
-			(style) => ({ ...style })
-		);
+		// New array/object *references* so the React view's memoised style
+		// resolution recomputes — but the style objects themselves keep their
+		// identity. The editor closures hold references to those objects, so
+		// cloning them here would orphan an in-progress edit (the symptom being
+		// a name or font that appears not to save after the first change).
+		this.plugin.settings.textStyles = [...this.plugin.settings.textStyles];
 		this.plugin.settings.styleAssignments = {
 			...this.plugin.settings.styleAssignments,
 		};
@@ -438,6 +441,18 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		this.render();
 	}
 
+	/** Reset the built-in Default style back to its neutral baseline. */
+	private resetDefaultStyle(): void {
+		const def = this.plugin.settings.textStyles.find(
+			(style) => style.id === DEFAULT_TEXT_STYLE_ID
+		);
+		if (def) {
+			Object.assign(def, DEFAULT_TEXT_STYLE);
+		}
+		this.commitStyleChange();
+		this.render();
+	}
+
 	/** Render the editor controls for one style. */
 	private renderStyleEditor(containerEl: HTMLElement, style: TextStyle): void {
 		const isDefault = style.id === DEFAULT_TEXT_STYLE_ID;
@@ -449,6 +464,12 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			heading.setDesc(
 				"The baseline style — leave it unchanged to keep the original look, or edit it to restyle everything at once."
 			);
+			heading.addExtraButton((button) => {
+				button
+					.setIcon("rotate-ccw")
+					.setTooltip("Reset the default style");
+				button.onClick(() => this.resetDefaultStyle());
+			});
 		} else {
 			heading.addExtraButton((button) => {
 				button.setIcon("trash").setTooltip("Delete style");
@@ -456,9 +477,21 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 			new Setting(containerEl).setName("Name").addText((text) => {
 				text.setValue(style.name);
+				// Track the name at focus so we only re-render (to refresh the
+				// assignment dropdowns) when it actually changed — re-rendering on
+				// every blur would be disruptive.
+				let nameAtFocus = style.name;
 				text.onChange((value) => {
 					style.name = value;
 					this.commitStyleChange();
+				});
+				text.inputEl.addEventListener("focus", () => {
+					nameAtFocus = style.name;
+				});
+				text.inputEl.addEventListener("blur", () => {
+					if (style.name !== nameAtFocus) {
+						this.render();
+					}
 				});
 			});
 		}
@@ -481,19 +514,26 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		new Setting(containerEl)
+		const sizeSetting = new Setting(containerEl)
 			.setName("Size")
-			.setDesc("Percentage of the element's default size.")
-			.addSlider((slider) => {
-				slider.setLimits(50, 300, 5);
-				slider.setValue(
-					Math.min(300, Math.max(50, style.sizePercent || 100))
-				);
-				slider.onChange((value) => {
-					style.sizePercent = value;
-					this.commitStyleChange();
-				});
+			.setDesc("Percentage of the element's default size.");
+		sizeSetting.addSlider((slider) => {
+			slider.setLimits(50, 300, 5);
+			slider.setValue(
+				Math.min(300, Math.max(50, style.sizePercent || 100))
+			);
+			slider.onChange((value) => {
+				style.sizePercent = value;
+				sizeValue.setText(`${value}%`);
+				this.commitStyleChange();
 			});
+		});
+		// A live read-out of the current percentage, since the slider's own
+		// (deprecated) dynamic tooltip only shows while dragging.
+		const sizeValue = sizeSetting.controlEl.createSpan({
+			cls: "newtab-style-size-value",
+			text: `${Math.round(style.sizePercent) || 100}%`,
+		});
 
 		new Setting(containerEl).setName("Weight").addDropdown((dropdown) => {
 			for (const weight of Object.values(FONT_WEIGHT)) {
