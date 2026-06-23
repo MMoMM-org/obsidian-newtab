@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/MMoMM-org/obsidian-newtab/compare/1.3.0...1.3.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* **settings:** font picker lists all installed fonts on focus ([61d0a2d](https://github.com/MMoMM-org/obsidian-newtab/commit/61d0a2d48cb132a03550716d23c8a490e8e8462e))
+
 # [1.3.0](https://github.com/MMoMM-org/obsidian-newtab/compare/1.2.0...1.3.0) (2026-06-23)
 
 
