@@ -1,8 +1,5 @@
 import { AbstractInputSuggest, App } from "obsidian";
-import {
-	getCachedSystemFonts,
-	loadSystemFonts,
-} from "React/Utils/systemFonts";
+import { loadSystemFonts } from "React/Utils/systemFonts";
 import { cssFontFamily } from "src/Utils/cssFontFamily";
 
 /**
@@ -10,9 +7,10 @@ import { cssFontFamily } from "src/Utils/cssFontFamily";
  * fonts whose name contains the typed query, previewing each option in its own
  * typeface; selecting one writes the family back via the callback.
  *
- * Enumeration (Local Font Access API) needs a user gesture, so the list is
- * loaded lazily from inside getSuggestions — typing is itself a gesture, and
- * each keystroke re-queries, so the list fills in as the user types. On
+ * Enumeration (Local Font Access API) needs a user gesture, which focusing or
+ * typing in the field provides. getSuggestions awaits the (cached-after-first)
+ * load, so the full list appears the moment the field is focused — no throwaway
+ * keystroke needed to kick it off — and an empty query lists every font. On
  * platforms without the API (mobile) there are simply no suggestions and the
  * field behaves as plain free text.
  */
@@ -23,18 +21,15 @@ export class FontSuggest extends AbstractInputSuggest<string> {
 		private onSelectFont: (font: string) => void
 	) {
 		super(app, inputEl);
+		// Render the whole list when browsing unfiltered; the popover scrolls
+		// and typing narrows it further. (Base class default is only 100.)
+		this.limit = 2000;
 	}
 
-	getSuggestions(query: string): string[] {
-		const fonts = getCachedSystemFonts();
-		if (fonts.length === 0) {
-			// Not loaded yet; this keystroke is the gesture that triggers it.
-			void loadSystemFonts();
-		}
+	async getSuggestions(query: string): Promise<string[]> {
+		const fonts = await loadSystemFonts();
 		const lower = query.toLowerCase();
-		return fonts
-			.filter((font) => font.toLowerCase().includes(lower))
-			.slice(0, 50);
+		return fonts.filter((font) => font.toLowerCase().includes(lower));
 	}
 
 	renderSuggestion(font: string, el: HTMLElement): void {
