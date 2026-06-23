@@ -83,6 +83,28 @@
 	}
 }
 
+// Collapsible style editor: each style is a <details> so the Styles tab stays
+// compact. Remove this block (and the <details>/<summary> wrapper in
+// renderStyleEditor) to revert to the always-expanded layout.
+.newtab-style {
+	margin: 0.5em 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: 0 0.75em;
+
+	> .newtab-style-summary {
+		padding: 0.6em 0;
+		cursor: pointer;
+		color: var(--text-normal);
+		font-weight: var(--font-semibold);
+	}
+
+	// Collapsed styles shouldn't carry the bottom border of their last setting.
+	.setting-item:last-child {
+		border-bottom: none;
+	}
+}
+
 // Live percentage read-out shown next to the text-style size slider.
 .newtab-style-size-value {
 	margin-left: 0.6em;

@@ -205,6 +205,8 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 	private headerRoot: Root | null = null;
 	/** Id of the currently selected settings tab. */
 	private activeTab = "background";
+	/** Ids of style editors currently expanded (preserved across re-renders). */
+	private readonly expandedStyles = new Set<string>();
 	/** The settings tabs, in display order. */
 	private readonly tabs: ReadonlyArray<{ id: string; label: string }> = [
 		{ id: "background", label: "Background" },
@@ -426,11 +428,14 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 	/** Append a new style (a copy of Default) and re-render the tab. */
 	private addStyle(): void {
 		const count = this.plugin.settings.textStyles.length;
+		const id = this.nextStyleId();
 		this.plugin.settings.textStyles.push({
 			...DEFAULT_TEXT_STYLE,
-			id: this.nextStyleId(),
+			id,
 			name: `Style ${count}`,
 		});
+		// Open the new style straight away so it's ready to edit.
+		this.expandedStyles.add(id);
 		this.commitStyleChange();
 		this.render();
 	}
@@ -467,50 +472,71 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		this.render();
 	}
 
-	/** Render the editor controls for one style. */
+	/** Render the editor controls for one style, inside a collapsible block. */
 	private renderStyleEditor(containerEl: HTMLElement, style: TextStyle): void {
 		const isDefault = style.id === DEFAULT_TEXT_STYLE_ID;
 
-		const heading = new Setting(containerEl)
-			.setName(style.name)
-			.setHeading();
+		// Each style is a collapsible <details> so the editors don't dominate the
+		// tab; open/closed state is remembered across re-renders. To revert to
+		// the always-open layout, render the rows straight into `containerEl`.
+		const details = containerEl.createEl("details", { cls: "newtab-style" });
+		details.open = this.expandedStyles.has(style.id);
+		details.addEventListener("toggle", () => {
+			if (details.open) {
+				this.expandedStyles.add(style.id);
+			} else {
+				this.expandedStyles.delete(style.id);
+			}
+		});
+		const summary = details.createEl("summary", {
+			cls: "newtab-style-summary",
+		});
+		summary.createSpan({
+			cls: "newtab-style-summary-name",
+			text: style.name,
+		});
+
 		if (isDefault) {
-			heading.setDesc(
-				"The baseline style — leave it unchanged to keep the original look, or edit it to restyle everything at once."
-			);
-			heading.addExtraButton((button) => {
-				button
-					.setIcon("rotate-ccw")
-					.setTooltip("Reset the default style");
-				button.onClick(() => this.resetDefaultStyle());
-			});
+			new Setting(details)
+				.setName("Default style")
+				.setDesc(
+					"The baseline style — leave it unchanged to keep the original look, or edit it to restyle everything at once."
+				)
+				.addExtraButton((button) => {
+					button
+						.setIcon("rotate-ccw")
+						.setTooltip("Reset the default style");
+					button.onClick(() => this.resetDefaultStyle());
+				});
 		} else {
-			heading.addExtraButton((button) => {
-				button.setIcon("trash").setTooltip("Delete style");
-				button.onClick(() => this.deleteStyle(style.id));
-			});
-			new Setting(containerEl).setName("Name").addText((text) => {
-				text.setValue(style.name);
-				// Track the name at focus so we only re-render (to refresh the
-				// assignment dropdowns) when it actually changed — re-rendering on
-				// every blur would be disruptive.
-				let nameAtFocus = style.name;
-				text.onChange((value) => {
-					style.name = value;
-					this.commitStyleChange();
+			new Setting(details)
+				.setName("Name")
+				.addText((text) => {
+					text.setValue(style.name);
+					// Track the name at focus so we only re-render (to refresh the
+					// summary and assignment dropdowns) when it actually changed —
+					// re-rendering on every blur would be disruptive.
+					let nameAtFocus = style.name;
+					text.onChange((value) => {
+						style.name = value;
+						this.commitStyleChange();
+					});
+					text.inputEl.addEventListener("focus", () => {
+						nameAtFocus = style.name;
+					});
+					text.inputEl.addEventListener("blur", () => {
+						if (style.name !== nameAtFocus) {
+							this.render();
+						}
+					});
+				})
+				.addExtraButton((button) => {
+					button.setIcon("trash").setTooltip("Delete style");
+					button.onClick(() => this.deleteStyle(style.id));
 				});
-				text.inputEl.addEventListener("focus", () => {
-					nameAtFocus = style.name;
-				});
-				text.inputEl.addEventListener("blur", () => {
-					if (style.name !== nameAtFocus) {
-						this.render();
-					}
-				});
-			});
 		}
 
-		new Setting(containerEl)
+		new Setting(details)
 			.setName("Font")
 			.setDesc(
 				"Type a font family, or start typing to pick from your installed fonts (desktop). Leave empty for the theme font."
@@ -528,7 +554,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 				});
 			});
 
-		const sizeSetting = new Setting(containerEl)
+		const sizeSetting = new Setting(details)
 			.setName("Size")
 			.setDesc("Percentage of the element's default size.");
 		sizeSetting.addSlider((slider) => {
@@ -549,7 +575,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			text: `${Math.round(style.sizePercent) || 100}%`,
 		});
 
-		new Setting(containerEl).setName("Weight").addDropdown((dropdown) => {
+		new Setting(details).setName("Weight").addDropdown((dropdown) => {
 			for (const weight of Object.values(FONT_WEIGHT)) {
 				dropdown.addOption(weight, WEIGHT_LABELS[weight]);
 			}
@@ -560,7 +586,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 		});
 
-		new Setting(containerEl).setName("Italic").addToggle((toggle) => {
+		new Setting(details).setName("Italic").addToggle((toggle) => {
 			toggle.setValue(style.italic);
 			toggle.onChange((value) => {
 				style.italic = value;
@@ -568,7 +594,7 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 			});
 		});
 
-		new Setting(containerEl)
+		new Setting(details)
 			.setName("Color")
 			.setDesc("Reset to inherit the theme's text color.")
 			.addColorPicker((picker) => {
