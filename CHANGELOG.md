@@ -1,3 +1,9 @@
+## [1.3.2](https://github.com/MMoMM-org/obsidian-newtab/compare/1.3.1...1.3.2) (2026-07-01)
+
+### Bug Fixes
+
+* **release:** conventionalcommits preset so semantic-release keeps ! commits ([4619dfb](https://github.com/MMoMM-org/obsidian-newtab/commit/4619dfb61f0a25db0a5a75cc4bfa2c01c23a8987))
+
 ## [1.3.1](https://github.com/MMoMM-org/obsidian-newtab/compare/1.3.0...1.3.1) (2026-06-23)
 
 
