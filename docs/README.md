@@ -23,6 +23,6 @@ These pages take you from installing the plugin to tuning every widget:
 ## Quick links
 
 - [Install from Community Plugins](installation.md#install-from-community-plugins)
-- [Set an Unsplash access key](configuration.md#background)
+- [Set an Unsplash access key](configuration.md#setting-the-unsplash-access-key)
 - [First use](usage.md#first-use)
 - [Backgrounds don't load](troubleshooting.md#backgrounds-dont-load)

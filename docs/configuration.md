@@ -26,7 +26,7 @@ ends with an **applied style** dropdown — see [Text styles](#styles).
 | Setting | Default | Description |
 |---|---|---|
 | Background theme | `Seasons and holidays` | Theme for the random background. **Seasons and holidays** varies by time of year; the fixed subjects **Winter, Spring, Summer, Fall, Mountains, Lakes, Forest, Animals** each always pull that subject; **Custom topic** uses your own search term; **Custom** lets you supply a URL; **Local** uses imported images; **Transparent** and **Transparent with shadows** show your Obsidian theme. The first ten (Seasons and holidays, the eight fixed subjects, and Custom topic) are Unsplash-backed and need an access key. |
-| Unsplash access key | _(unset)_ | Required for the Unsplash-backed themes. Create a free app at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications) and paste its access key. Stored securely outside `data.json`. Shown only for Unsplash-backed themes. |
+| Unsplash access key | _(unset)_ | Required for the Unsplash-backed themes. Stored in Obsidian's secret store, not in `data.json`. Shown only for Unsplash-backed themes — see [Setting the Unsplash access key](#setting-the-unsplash-access-key). |
 | Custom topic | `""` | Search term(s) used to pick a random Unsplash photo, e.g. "ocean sunset". Shown only when the theme is "Custom topic". |
 | Custom background URL | `""` | The URL to use for the background image. Shown only when the theme is "Custom". |
 | Background image folder | `""` | When the theme is "Local", a random image from this vault folder (and subfolders) is shown. |
@@ -38,6 +38,26 @@ ends with an **applied style** dropdown — see [Text styles](#styles).
 <p align="center">
   <img src="../assets/settings-background-themes.png" alt="The background theme dropdown listing every available theme" />
 </p>
+
+#### Setting the Unsplash access key
+
+Unsplash shows three different values and Obsidian's dialog has two fields, so
+it is easy to put the wrong value in the wrong place. The full path:
+
+1. Create a free app at
+   [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications).
+2. On the app's page, copy the **Access Key** — roughly 43 characters. Unsplash
+   also shows a **Secret key** and a short numeric **Application ID**; New Tab
+   uses neither.
+3. In **Settings → Background**, use the button next to **Unsplash access key**.
+   Obsidian opens its own dialog with two fields:
+   - **ID** — a name *you* choose for the stored entry, e.g. `unsplash`. It
+     labels the secret inside Obsidian and is unrelated to Unsplash's
+     Application ID.
+   - **Secret** — paste the **Access Key** here.
+
+Only the ID you picked is written to `data.json`; the key itself stays in
+Obsidian's secret store, so it never travels with your settings file.
 
 ### Search
 
