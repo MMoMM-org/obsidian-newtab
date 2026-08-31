@@ -40,7 +40,6 @@ import {
 	STYLE_TARGET_LABELS,
 	defaultStyleAssignments,
 } from "src/Settings/textStyles";
-import capitalizeFirstLetter from "src/Utils/capitalizeFirstLetter";
 import { themeUsesUnsplash } from "src/Utils/themeUsesUnsplash";
 import { uniqueVaultPath } from "src/Utils/uniqueVaultPath";
 import { createElement } from "react";
@@ -132,6 +131,29 @@ export interface NewTabPluginSettings {
 	 */
 	styleAssignments: Record<STYLE_TARGET, string>;
 }
+
+/**
+ * Display labels for the background-theme dropdown. "Custom topic" and "Custom"
+ * are one word apart but do completely different things (a search term vs an
+ * image URL), so both carry a qualifier — see #49. A full Record rather than a
+ * derived label so adding a theme fails to compile until it is named here.
+ */
+const BACKGROUND_THEME_LABELS: Record<BackgroundTheme, string> = {
+	[BackgroundTheme.SEASONS_AND_HOLIDAYS]: "Seasons and holidays",
+	[BackgroundTheme.WINTER]: "Winter",
+	[BackgroundTheme.SPRING]: "Spring",
+	[BackgroundTheme.SUMMER]: "Summer",
+	[BackgroundTheme.FALL]: "Fall",
+	[BackgroundTheme.MOUNTAIN]: "Mountains",
+	[BackgroundTheme.LAKES]: "Lakes",
+	[BackgroundTheme.FOREST]: "Forest",
+	[BackgroundTheme.ANIMALS]: "Animals",
+	[BackgroundTheme.CUSTOM_TOPIC]: "Custom topic (search term)",
+	[BackgroundTheme.CUSTOM]: "Custom (image URL)",
+	[BackgroundTheme.LOCAL]: "Local",
+	[BackgroundTheme.TRANSPARENT]: "Transparent",
+	[BackgroundTheme.TRANSPARENT_WITH_SHADOWS]: "Transparent with shadows",
+};
 
 /** Sentence-case labels for the font-weight dropdown. */
 const WEIGHT_LABELS: Record<FONT_WEIGHT, string> = {
@@ -745,11 +767,11 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Background theme")
 			.setDesc(
-				`What theme would you like to utilize for the random backgrounds? "seasons and holidays" will use a different tag depending on the time of the year. Custom will allow you to input your own URL. Local will use the local images imported below.`
+				`Source for the random background. Seasons and holidays follows the time of year, and the eight fixed subjects each always pull that subject. Custom topic takes an Unsplash search term of your own, such as "tokyo at night" — those ten options need an access key. Custom takes a direct image URL instead. Local shows random images from a vault folder. The transparent options show your Obsidian theme.`
 			)
 			.addDropdown((component) => {
 				Object.values(BackgroundTheme).forEach((theme) => {
-					component.addOption(theme, capitalizeFirstLetter(theme));
+					component.addOption(theme, BACKGROUND_THEME_LABELS[theme]);
 				});
 
 				component.setValue(this.plugin.settings.backgroundTheme);
