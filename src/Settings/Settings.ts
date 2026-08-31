@@ -777,7 +777,18 @@ export class NewTabPluginSettingTab extends PluginSettingTab {
 							href: "https://unsplash.com/oauth/applications",
 						});
 						frag.appendText(
-							", then paste its access key here. Stored securely outside your settings file."
+							" and copy its Access Key — the Secret key shown next to it is not needed. In the dialog below, "
+						);
+						// Obsidian's SecretComponent labels these fields itself and
+						// exposes no way to rename them, so spell out what each one
+						// wants (see issue #46).
+						frag.createEl("strong", { text: "ID" });
+						frag.appendText(
+							" is any name you pick for the entry, and "
+						);
+						frag.createEl("strong", { text: "Secret" });
+						frag.appendText(
+							" is where the Access Key goes. Stored in Obsidian's secret store, never in your settings file."
 						);
 					})
 				);

@@ -25,7 +25,7 @@ Check the `[NewTab:background]` lines:
 
 | Log line | Meaning | Fix |
 |----------|---------|-----|
-| `no Unsplash access key set` | No key configured. | Settings → Background → **Unsplash access key**. Create a free app at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications) and paste its key. |
+| `no Unsplash access key set` | No key configured. | Settings → Background → **Unsplash access key**. Create a free app at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications), then paste its **Access Key** into the **Secret** field of Obsidian's dialog — **ID** is just a name you pick. See [Setting the Unsplash access key](configuration.md#setting-the-unsplash-access-key). |
 | `status 401` / `invalid access token` | The stored key is wrong. | Copy the **Access Key** (~43 chars), *not* the **Secret key** and *not* the numeric **Application ID**. The log shows `keyLength=` to sanity-check — 8 characters usually means you grabbed the Application ID. |
 | `status 403` | Rate limit reached. | The Unsplash demo tier allows 50 requests/hour. The image is cached per hour (one request per theme per hour), so normal use stays well under it — wait an hour. |
 | `200 OK but no urls.regular` | Unexpected response. | Transient; try again later. |

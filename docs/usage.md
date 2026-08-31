@@ -19,7 +19,7 @@ tab is replaced by the New Tab view. With the default settings it shows:
 
 Nothing else is required to start. One caveat: the default background theme
 (*Seasons and holidays*) pulls from Unsplash, so it needs a free access key —
-see [Configuration](configuration.md). Until a key is set, switch the background
+see [Setting the Unsplash access key](configuration.md#setting-the-unsplash-access-key). Until a key is set, switch the background
 to **Local**, **Custom** (a URL), or **Transparent** for a fully offline new
 tab.
 
