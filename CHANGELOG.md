@@ -1,3 +1,9 @@
+## [1.3.4](https://github.com/MMoMM-org/obsidian-newtab/compare/1.3.3...1.3.4) (2026-08-31)
+
+### Bug Fixes
+
+* **settings:** name Custom topic in the background theme description ([d90797d](https://github.com/MMoMM-org/obsidian-newtab/commit/d90797d7ddd4c2cbd6e1b3760d58688b57637784)), closes [#46](https://github.com/MMoMM-org/obsidian-newtab/issues/46) [#49](https://github.com/MMoMM-org/obsidian-newtab/issues/49)
+
 ## [1.3.3](https://github.com/MMoMM-org/obsidian-newtab/compare/1.3.2...1.3.3) (2026-08-31)
 
 ### Bug Fixes
